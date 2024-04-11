@@ -1,0 +1,145 @@
+env byte networkDelayDoor = 3;
+env byte networkDelayTrain = 0;
+env byte reactionDelay = 1;
+env byte passengerPeriod = 5;
+env short runningTime = 233;
+env short atStationTime = 50;
+
+reactiveclass Controller(23){
+	knownrebecs{
+		Door door; 
+		Train train;
+	} 
+	statevars{
+		boolean isClosed;
+		boolean isLocked; 
+		boolean trainStatus; 
+		boolean commandToMove;
+		} 
+	Controller(){
+		trainStatus = true;
+		commandToMove = false;
+		isClosed = false;
+		isLocked = false; 
+		}
+		 
+	msgsrv setDoorStatus(boolean close, boolean lock) {
+	     isClosed = close;
+	     isLocked = lock;
+	     self.driveController();
+	}  
+	msgsrv setTrainStatus(boolean status, boolean isRunning){
+		trainStatus = status; 
+		commandToMove = isRunning;
+		self.driveController(); 
+	}
+		 
+	msgsrv driveController(){ 
+		if(trainStatus){ //leave the station
+			if(!isClosed || !isLocked) {
+				if(!isClosed)	
+					door.closeDoor() after(networkDelayDoor);
+				if(!isLocked)
+					door.lockDoor()             
+					after(reactionDelay  + networkDelayDoor);
+			}         
+			if(isClosed && isLocked && !commandToMove)
+				train.running() after(networkDelayTrain);
+		}// end of if(trainStatus)
+		else if(!trainStatus){ // arrive to the station
+			if(isClosed || isLocked) {
+			   if(isLocked)
+			   	door.unlockDoor() after(networkDelayDoor);
+			if(isClosed)
+				door.openDoor()after(reactionDelay  + networkDelayDoor);
+			}  
+		}// end of else if(!trainStatus)
+	} // end of driveController()
+} //end of the Controller class 
+
+
+reactiveclass Train(5){
+	knownrebecs{
+	Controller controller;
+	}	
+	statevars{
+		boolean status;
+		boolean isRun;
+		}
+	Train(){
+		status = true;
+		isRun = false;
+		self.leaveStation(); 
+	}
+	msgsrv leaveStation(){
+		status = true;
+		isRun = false;
+		controller.setTrainStatus(status, isRun)
+		after(networkDelayTrain); 
+		
+		}
+	msgsrv running(){
+		isRun = true;
+		controller.setTrainStatus(status, isRun)
+		after(networkDelayTrain);
+		self.approachStation() after(runningTime);
+	}
+	msgsrv approachStation(){
+		status = false;
+		isRun = false;
+		controller.setTrainStatus(status, isRun) after(networkDelayTrain);
+		self.leaveStation() after(atStationTime);
+	}
+} //end of the Train 
+
+reactiveclass Door(15){
+	knownrebecs{
+	Controller controller;
+	}
+	statevars{
+		boolean isDoorClosed;
+		boolean isDoorLocked;
+		}
+	Door(){
+	isDoorClosed = false;
+	isDoorLocked = false;
+	}
+	msgsrv closeDoor(){
+		isDoorClosed = true;
+		controller.setDoorStatus(isDoorClosed, isDoorLocked)
+		after(networkDelayDoor);
+	}
+	msgsrv lockDoor(){
+		if (isDoorClosed){            
+		// The door is only locked if the door is closed.
+			isDoorLocked = true;
+		}
+		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
+	}
+	msgsrv unlockDoor(){
+		isDoorLocked = false;
+		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
+	}
+	msgsrv openDoor(){// The door is only opened if the door is not locked.
+		if(!isDoorLocked){
+			isDoorClosed = false;
+		}
+		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
+	}
+} //end of the Door class
+
+reactiveclass Passenger(5){
+	knownrebecs{Door door;} 
+	Passenger(){self.passengerOpenDoor() after(passengerPeriod);
+	}
+	msgsrv passengerOpenDoor(){door.openDoor();
+		self.passengerOpenDoor() after(passengerPeriod);
+	}
+} //end of the Passenger class
+main {
+	Controller controller(door, train):();
+	Door door(controller):();       
+	Train train(controller):();
+	Passenger passenger(door):();
+} 
+	

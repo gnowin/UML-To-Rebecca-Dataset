@@ -1,0 +1,46 @@
+	reactiveclass Node(8){
+	knownrebecs {
+		Node rightNode;
+	}
+	statevars {
+		boolean isLeader;
+		int myNumber;
+		int currentLeader;		
+	}
+	
+	Node(byte n) {
+		myNumber = n;
+		currentLeader = n;
+		isLeader = false;
+		self.send();
+	}
+	
+	msgsrv ImLeader() {
+		self.ImLeader();
+		//The algorithm terminates here, but the leader keeps sending a msg to himself to avoid deadlock.
+	}
+	msgsrv send() {
+		rightNode.receive(currentLeader);
+	}
+	msgsrv receive(int n) {
+		if (n == myNumber) {
+			isLeader = true;
+			self.ImLeader();
+		}
+		else {
+			if (n > currentLeader) {
+				currentLeader = n;
+				self.send();
+			}
+			//else discard
+		}
+	}
+}
+
+main { 
+//Each node must have a unique identifier
+//In case of having more than three nodes or changing the leader to other node (rather than node1), you should change the property file too.
+   Node node0(node2):(4); 
+   Node node1(node0):(20); 
+   Node node2(node1):(10); 
+} 

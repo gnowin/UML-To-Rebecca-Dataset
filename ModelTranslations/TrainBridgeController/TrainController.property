@@ -1,0 +1,14 @@
+	property {
+	define{
+		train1OnBridge = train1.onTheBridge;
+		train2OnBridge = train2.onTheBridge;
+		train1Wait = theController.isWaiting1;
+		train2Wait = theController.isWaiting2;
+	}
+	
+	LTL{
+		Starvation: G(F(train1OnBridge) && F(train2OnBridge));
+		Safetly: G(!(train1OnBridge && train2OnBridge));
+		test: G(F(train2Wait && !train1OnBridge && !train2OnBridge));
+	}
+}

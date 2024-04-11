@@ -1,0 +1,74 @@
+@startuml
+
+hide empty description
+
+state t1{
+
+state t1_A : !onTheBridge
+
+state t1_B : onTheBridge
+
+[*] -> t1_A
+
+t1_A -> t1_B : YouMayPass()
+
+t1_B -> t1_A : Passed()
+
+}
+
+state t2{
+
+t2_A : !onTheBridge
+
+t2_B : onTheBridge
+
+[*] -> t2_A
+
+t2_A -> t2_B : YouMayPass()
+
+t2_B -> t2_A : Passed()
+
+}
+
+state controller{
+
+State c_ : !isOnBridge1
+State c_ : !isOnBridge2
+State c_ : !isWaiting1
+State c_ : !isWaiting2
+
+State c_A : isOnBridge1
+State c_A : !isOnBridge2
+State c_A : !isWaiting1
+State c_A : !isWaiting2
+
+State c_B : !isOnBridge1
+State c_B : isOnBridge2
+State c_B : !isWaiting1
+State c_B : !isWaiting2
+State c_C : isOnBridge1
+State c_C : !isOnBridge2
+State c_C : !isWaiting1
+State c_C : isWaiting2
+State c_D : !isOnBridge1
+State c_D : isOnBridge2
+State c_D : isWaiting1
+State c_D : !isWaiting2
+
+[*] -> c_
+
+c_ --> c_A : arrive() \n (sender == t1 \n t1.YouMayPass())
+
+c_ --> c_B : arrive() \n (sender == t2 \n t2.YouMayPass())
+
+c_A --> c_C : arrive() \n (sender != t1 \n isWaiting2 = true)
+
+c_B --> c_D : arrive() \n (sender == t1 \n isWaiting1 = true)
+
+c_C --> c_B : Leave() \n (sender == t1 \n t2.YouMayPass())
+
+c_D --> c_A : Leave \n (sender != t1 \n t1.YouMayPass())
+
+}
+
+@enduml 

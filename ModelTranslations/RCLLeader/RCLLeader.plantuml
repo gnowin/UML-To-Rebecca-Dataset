@@ -1,0 +1,67 @@
+@startuml
+
+hide empty description
+
+state node0{
+    state node1_A : !isLeader
+    state node1_A : nyNumber = 4
+    state node1_A : currentLeader = 4
+
+    state node1_B : !isLeader
+    state node1_B : myNumber = 4
+    state node1_B : currentLeader = n
+
+    state node1_C : isLeader
+    state node1_C : myNumber = 4
+    state node1_C : currentLeader = n
+
+    [*] -> node1_A : node2.recieve(currentLeader)
+    node1_A -> node1_B : recieve(n) \n (n > currentLeader \n currentLeader = n \n node2.recieve(currentLeader))
+    node1_B -> node1_B : recieve(n) \n (n > currentLeader \n currentLeader = n \n node2.recieve(currentLeader))
+    node1_B --> node1_C : recieve(n) \n (n == myNumber \n self.ImLeader())
+    node1_C -> node1_C : self.ImLeader()
+
+}
+
+
+state node1{
+    state node0_A : !isLeader
+    state node0_A : nyNumber = 20
+    state node0_A : currentLeader = 20
+
+    state node0_B : !isLeader
+    state node0_B : myNumber = 20
+    state node0_B : currentLeader = n
+
+    state node0_C : isLeader
+    state node0_C : myNumber = 20    
+    state node0_C : currentLeader = n
+
+    [*] -> node0_A : node0.recieve(currentLeader)
+    node0_A -> node0_B : recieve(n) \n (n > currentLeader \n currentLeader = n \n node0.recieve(currentLeader))
+    node0_B -> node0_B : recieve(n) \n (n > currentLeader \n currentLeader = n \n node0.recieve(currentLeader))
+    node0_B --> node0_C : recieve(n) \n (n == myNumber \n self.ImLeader())
+    node0_C -> node0_C : self.ImLeader()
+}
+
+state node2{
+    state node2_A : !isLeader
+    state node2_A : nyNumber = 20
+    state node2_A : currentLeader = 20
+
+    state node2_B : !isLeader
+    state node2_B : myNumber = 20
+    state node2_B : currentLeader = n
+
+    state node2_C : isLeader
+    state node2_C : myNumber = 20    
+    state node2_C : currentLeader = n
+
+    [*] -> node2_A : node1.recieve(currentLeader)
+    node2_A -> node2_B : recieve(n) \n (n > currentLeader \n currentLeader = n \n node1.recieve(currentLeader))
+    node2_B -> node2_B : recieve(n) \n (n > currentLeader \n currentLeader = n \n node1.recieve(currentLeader))
+    node2_B --> node2_C : recieve(n) \n (n == myNumber \n self.ImLeader())
+    node2_C -> node2_C : self.ImLeader()
+}
+
+@enduml

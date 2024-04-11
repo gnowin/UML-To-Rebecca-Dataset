@@ -1,0 +1,10 @@
+property {
+	define {
+		notLeader0 = !node0.isLeader;
+		leader1 = node1.isLeader;
+		notLeader2 = !node2.isLeader;
+	}
+	LTL {
+		Progress: F(notLeader0 && leader1 && notLeader2);
+	}
+}

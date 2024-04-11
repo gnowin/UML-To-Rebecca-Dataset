@@ -1,0 +1,54 @@
+@startuml
+
+hide empty description
+
+state BufferManager {
+    state bf_A : empty
+    state bf_A : !full
+    state bf_A : !producerWaiting
+    state bf_A : !consumerWaiting
+
+    state bf_B : empty
+    state bf_B : !full
+    state bf_B : !producerWaiting
+    state bf_B : consumerWaiting
+
+    state bf_C : !empty
+    state bf_C : !full
+    state bf_C : !producerWaiting
+    state bf_C : !consumerWaiting
+
+    state bf_D : !empty
+    state bf_D : full
+    state bf_D : !producerWaiting
+    state bf_D : !consumerWaiting
+
+    state bf_E : !empty
+    state bf_E : full
+    state bf_E : producerWaiting
+    state bf_E : consumerWaiting
+
+    
+    [*] -> bf_A
+
+    bf_A -> bf_A : giveMeNextProduce() \n (producer.produce(nextProduce))
+
+    bf_A -up-> bf_B : giveMeNextConsume() \n (consumerWaiting = true)
+    bf_B -down-> bf_A : ackProduce() \n (consumer.consume(nextConsume) \n consumerWaiting = false)
+   
+    bf_B -> bf_B : giveMeNextProduce() \n (producer.produce(nextProduce))
+
+    bf_A --> bf_C : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength \n empty = false)
+    bf_C -left-> bf_A : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce \n empty = true)
+
+    bf_C -> bf_C : giveMeNextProduce() \n (producer.produce(nextProduce)) \n giveMeNextConsume() \n (consumer.consume(nextConsume))
+
+    bf_C --> bf_D : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume \n full = true)
+    bf_D --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n full = false \n producer.produce(nextProduce) \n producerWaiting = false)
+
+    bf_D --> bf_E : giveMeNextProduce() \n (producerWaiting = true)
+    bf_E --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n full = false \n producer.produce(nextProduce) \n producerWaiting = false)
+    
+}
+
+@enduml

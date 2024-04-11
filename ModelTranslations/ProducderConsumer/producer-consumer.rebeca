@@ -1,0 +1,122 @@
+reactiveclass BufferManager(4) {
+	knownrebecs {
+		Producer producer;
+		Consumer consumer;
+	}
+
+	statevars {
+		boolean empty;
+		boolean full;
+		boolean producerWaiting;
+		boolean consumerWaiting;
+		int bufferlenght;
+		int nextProduce;
+		int nextConsume;		
+	}
+
+	BufferManager() {
+		bufferlenght = 2;
+		empty = true;
+		full = false;
+		producerWaiting = false;
+		consumerWaiting = false;
+		nextProduce = 0;
+		nextConsume = 0;
+	}
+
+	msgsrv giveMeNextProduce() {
+		if (!full)	{
+			producer.produce(nextProduce);
+		} 
+		// re
+		/*else {
+			producerWaiting = true;
+		}*/
+	}
+
+	msgsrv giveMeNextConsume() {
+		if (!empty) {
+			consumer.consume(nextConsume);
+		} 
+     	else {
+			consumerWaiting = true;
+		}
+	}	
+
+	msgsrv ackProduce() {
+		nextProduce = (nextProduce + 1) %
+                    bufferlenght;
+		if (nextProduce == nextConsume) {
+			full = true;
+		}
+		empty = false;
+		if (consumerWaiting) {
+			consumer.consume(nextConsume);
+			consumerWaiting = false;
+		}
+	}
+
+	msgsrv ackConsume() {
+		nextConsume = (nextConsume + 1) %
+                    bufferlenght;
+		if (nextConsume == nextProduce) {
+			empty = true;
+		}
+		full = false;
+		if (producerWaiting) {
+			producer.produce(nextProduce);
+			producerWaiting = false;
+		}
+	}
+}
+
+reactiveclass Producer(2) {
+	knownrebecs {
+		BufferManager buffer;
+	}
+
+	statevars {
+	}
+
+	Producer() {
+		self.beginProduce();
+	}
+	
+	msgsrv produce(int bufNum) {
+		buffer.ackProduce();
+		self.beginProduce();
+	}
+
+	msgsrv beginProduce() {
+		buffer.giveMeNextProduce();
+	}
+}
+
+reactiveclass Consumer(2) {
+	knownrebecs {
+		BufferManager buffer;		
+	}
+
+	statevars {
+	}
+
+	Consumer() {
+		self.beginConsume();
+	}
+
+	msgsrv consume(int bufNum) {
+		buffer.ackConsume();
+		self.beginConsume();	
+	}
+	
+	msgsrv beginConsume() {
+		buffer.giveMeNextConsume();
+	}
+
+}
+
+main { 
+	BufferManager buffer(producer, consumer):();
+	Producer producer(buffer):();
+	Consumer consumer(buffer):();
+}

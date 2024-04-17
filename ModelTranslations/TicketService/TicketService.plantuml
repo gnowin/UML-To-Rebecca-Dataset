@@ -5,28 +5,28 @@ state Customer1{
 state C1 : 
 
 
-[*] -> C1 : agent.requestTicket()
-C1 -> C1 : agent.requestTicket()after(30)
+[*] -> C1 : id = myID \n self.try() \n agent.requestTicket()
+C1 -> C1 : ticketIssued() \n agent.requestTicket()after(30)
 }
 
 state Customer2{
 state C2 : 
 
 
-[*] -> C2 : agent.requestTicket()
-C2 -> C2 : agent.requestTicket()after(30)
+[*] -> C2 : id = myID \n self.try() \n agent.requestTicket()
+C2 -> C2 : ticketIssued() \n agent.requestTicket()after(30)
 }
 
 state Agent{
 state A :
 [*] -> A
-A -> A : TicketService.requestTicket(Customer)
-A -> A : TicketIssued
+A -> A : requestTicket() \n TicketService.requestTicket(Customer)
+A -> A : ticketIssued(Customer customer) \n customer.ticketIssued()
 }
 
 state TicketService{
 state T :
 [*] -> T
-T -> T : (Agent)sender).ticketIssued(customer)delay(2, 3)
+T -> T : requestTicket(Customer customer) \n (Agent)sender).ticketIssued(customer)delay(2, 3)
 }
 @enduml

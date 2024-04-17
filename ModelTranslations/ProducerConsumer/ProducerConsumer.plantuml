@@ -48,7 +48,21 @@ state BufferManager {
 
     bf_D --> bf_E : giveMeNextProduce() \n (producerWaiting = true)
     bf_E --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n full = false \n producer.produce(nextProduce) \n producerWaiting = false)
-    
+}
+
+state Producer{
+
+    state p_A
+
+    [*] -> p_A : self.beginProduce()
+    p_A -> p_A : produce(int bufNum) \n (buffer.ackProduce() \n self.beginProduce()) \n beginProduce() \n (buffer.giveMeNextProduce())
+}
+
+state Consumer{
+    state c_A
+
+    [*] -> c_A : self.beginConsume()
+    c_A -> c_A : consume(int bufNum) \n (buffer.ackConsume() \n self.beginConsume()) \n beginConsume() \n (buffer.giveMeNextConsume())
 }
 
 @enduml

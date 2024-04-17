@@ -2,7 +2,7 @@
 
 hide empty description
 
-state node0{
+state node{
     state node_A : !isLeader
 
     state node_B : !isLeader

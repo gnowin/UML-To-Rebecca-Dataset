@@ -2,71 +2,84 @@
 hide empty description
 
 state Train{
-state T_1 : !trainStatus
-state T_1 : !isRunning
+state T_1 : !status
+state T_1 : !isRun
 
-state T_2 : trainStatus
-state T_2 : !isRunning
+state T_2 : status
+state T_2 : !isRun
 
-state T_3 : trainStatus
-state T_3 : isRunning
+state T_3 : status
+state T_3 : isRun
 
-T_1 -> T_2 : LeaveStation()after(t2), trainStatus=true, isRunning=false
-T_2 -> T_3 : trainStatus=false, running()after(t1), isRunning=true
-T_3 -> T_1 : approachStation()after(t1), trainStatus=false, isRunning=false
+
+[*] -> T_2 : self.leaveStation()
+T_1 -> T_2 : LeaveStation() \n (controller.setTrainStatus(status, isRun) \n after(networkDelayTrain))
+T_2 -> T_3 : running() \n (controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.approachStation() after(runningTime))
+T_3 -> T_1 : approachStation() \n (controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.leaveStation() after(atStationTime))
 }
 
 state Door{
-state D_1 : Locked
-state D_1 : Closed
+state D_1 : !isDoorClosed
+state D_1 : !isDoorLocked
 
-state D_2 : Unlocked
-state D_2 : Closed
+state D_2 : isDoorClosed
+state D_2 : !isDoorLocked
 
-state D_3 : Unlocked
-state D_3 : Opened
+state D_3 : isDoorClosed
+state D_3 : isDoorLocked
 
-D_1 -> D_2 : unlockDoor()
-D_2 -> D_1 : lockDoor()
-D_2 -> D_3 : OpenDoor()
-D_3 -> D_2 : closeDoor()
+[*] -> D_1
+
+D_1 -> D_1 : lockDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n unlockDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n openDoor() \n (controller.setDoorStatus after(networkDelayDoor))
+
+D_1 --> D_2 : closeDoor() \n (controller.setDoorStatus(isDoorClosed, isDoorLocked)  after(networkDelayDoor))
+
+D_2 --> D_1 : openDoor() \n (controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor))
+
+D_2 -> D_2 : closeDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n unlockDoor() \n (controller.setDoorStatus after(networkDelayDoor))
+
+D_2 --> D_3 : lockDoor() \n ((isDoorClosed == true) \n controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor))
+
+D_3 -> D_3 : lockDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n closeDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n openDoor() \n (controller.setDoorStatus after(networkDelayDoor))
+
+D_3 --> D_2 : unlockDoor() \n (controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor))
 }
 
 state Controller{
+state C_1 : isClosed
+state C_1 : isLocked
 state C_1 : trainStatus
 state C_1 : isRunning
-state C_1 : Locked
-state C_1 : Closed
 
+state C_2 : isClosed
+state C_2 : isLocked
 state C_2 : !trainStatus
 state C_2 : !isRunning
-state C_2 : Locked
-state C_2 : Closed
 
+state C_3 : isClosed
+state C_3 : !isLocked
 state C_3 : !trainStatus
 state C_3 : !isRunning
-state C_3 : Unlocked
-state C_3 : Closed
 
+state C_4 : !isClosed
+state C_4 : !isLocked
 state C_4 : !trainStatus
 state C_4 : !isRunning
-state C_4 : Unlocked
-state C_4 : Opened
 
+state C_5 : !isClosed
+state C_5 : !isLocked
 state C_5 : trainStatus
 state C_5 : !isRunning
-state C_5 : Unlocked
-state C_5 : Opened
 
+state C_6 : isClosed
+state C_6 : !isLocked
 state C_6 : trainStatus
 state C_6 : !isRunning
-state C_6 : Unlocked
-state C_6 : Closed
 
+state C_7 : isClosed
+state C_7 : isLocked
 state C_7 : trainStatus
 state C_7 : !isRunning
-state C_7 : Locked
-state C_7 : Closed
 
 C_1 -> C_2 : train.approachStation()after(t1)
 C_2 -> C_3 : door.unlockDoor()
@@ -79,6 +92,8 @@ C_7 -> C_1 : train.running()after(t1)
 
 state Passanger{
 state P : P
-P -> P : passengerOpenDoor()
+
+[*] -> P : self.passengerOpenDoor() after(passengerPeriod)
+P -> P : passengerOpenDoor() \n (door.openDoor() \n self.passengerOpenDoor() after(passengerPeriod))
 }
 @enduml

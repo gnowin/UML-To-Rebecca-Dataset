@@ -2,30 +2,28 @@
 hide empty description
 
 state Customer1{
-state C1 : 
-
+state C1
 
 [*] -> C1 : id = myID \n self.try() \n agent.requestTicket()
 C1 -> C1 : ticketIssued() \n agent.requestTicket()after(30)
 }
 
 state Customer2{
-state C2 : 
-
+state C2 
 
 [*] -> C2 : id = myID \n self.try() \n agent.requestTicket()
 C2 -> C2 : ticketIssued() \n agent.requestTicket()after(30)
 }
 
 state Agent{
-state A :
+state A
 [*] -> A
 A -> A : requestTicket() \n TicketService.requestTicket(Customer)
 A -> A : ticketIssued(Customer customer) \n customer.ticketIssued()
 }
 
 state TicketService{
-state T :
+state T
 [*] -> T
 T -> T : requestTicket(Customer customer) \n (Agent)sender).ticketIssued(customer)delay(2, 3)
 }

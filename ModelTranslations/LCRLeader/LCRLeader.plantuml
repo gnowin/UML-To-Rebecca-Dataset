@@ -5,7 +5,7 @@ hide empty description
 state node{
     state node_A : !isLeader
 
-    state node_B : !isLeader
+    state node_B : isLeader
 
     [*] -> node_A : self.send()
     node_A -> node_A : recieve(n) \n (n > currentLeader \n currentLeader = n \n self.send()) \n send() \n (rightNode.recieve(currentLeader))

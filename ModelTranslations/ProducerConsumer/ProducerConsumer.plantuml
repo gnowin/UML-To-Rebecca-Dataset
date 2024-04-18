@@ -26,28 +26,28 @@ state BufferManager {
     state bf_E : !empty
     state bf_E : full
     state bf_E : producerWaiting
-    state bf_E : consumerWaiting
+    state bf_E : !consumerWaiting
 
     
     [*] -> bf_A
 
     bf_A -> bf_A : giveMeNextProduce() \n (producer.produce(nextProduce))
 
-    bf_A -up-> bf_B : giveMeNextConsume() \n (consumerWaiting = true)
-    bf_B -down-> bf_A : ackProduce() \n (consumer.consume(nextConsume) \n consumerWaiting = false)
+    bf_A -up-> bf_B : giveMeNextConsume() \n ()
+    bf_B -down-> bf_A : ackProduce() \n (consumer.consume(nextConsume))
    
     bf_B -> bf_B : giveMeNextProduce() \n (producer.produce(nextProduce))
 
-    bf_A --> bf_C : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength \n empty = false)
-    bf_C -left-> bf_A : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce \n empty = true)
+    bf_A --> bf_C : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength)
+    bf_C -left-> bf_A : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce)
 
     bf_C -> bf_C : giveMeNextProduce() \n (producer.produce(nextProduce)) \n giveMeNextConsume() \n (consumer.consume(nextConsume))
 
-    bf_C --> bf_D : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume \n full = true)
-    bf_D --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n full = false \n producer.produce(nextProduce) \n producerWaiting = false)
+    bf_C --> bf_D : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume)
+    bf_D --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce))
 
-    bf_D --> bf_E : giveMeNextProduce() \n (producerWaiting = true)
-    bf_E --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n full = false \n producer.produce(nextProduce) \n producerWaiting = false)
+    bf_D --> bf_E : giveMeNextProduce() \n ()
+    bf_E --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce))
 }
 
 state Producer{

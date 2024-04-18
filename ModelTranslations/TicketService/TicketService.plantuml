@@ -1,18 +1,11 @@
 @startuml
 hide empty description
 
-state Customer1{
-state C1
+state Customer{
+state C
 
-[*] -> C1 : id = myID \n self.try() \n agent.requestTicket()
-C1 -> C1 : ticketIssued() \n agent.requestTicket()after(30)
-}
-
-state Customer2{
-state C2 
-
-[*] -> C2 : id = myID \n self.try() \n agent.requestTicket()
-C2 -> C2 : ticketIssued() \n agent.requestTicket()after(30)
+[*] -> C : id = myID \n self.try() \n agent.requestTicket()
+C -> C : ticketIssued() \n self.try() after(30) \n agent.requestTicket()
 }
 
 state Agent{

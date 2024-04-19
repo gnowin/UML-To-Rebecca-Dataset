@@ -1,0 +1,19 @@
+Correct:
+reactiveclasses defines queue size correctly
+
+The logic and if statements seem to mostly be correct. If the syntax worked, then the model might too.
+
+Wrong:
+In the result, it explains the code as a code skeleton. It should be a fully working example.
+
+No constructors.
+
+statevars not defined correctly. Using keyword "state" (old syntax)?
+
+Creates two identical train classes.
+
+No knownrebecs defined.
+
+In t1 and t2, sending message to message servers in controller is done wrong. "main.controller!Arrive(self)". Kind of like its trying to message the controller rebec without any knownrebec.
+
+main is close to correct, but for example "Controller controller():{};" instead of "Controller controller():();".

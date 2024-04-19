@@ -1,0 +1,100 @@
+The PlantUML diagram you provided describes a system with multiple states and transitions. Translating this to Rebeca (Reactive Objects Language) involves defining reactive classes for each entity (t1, t2, controller) and handling messages that trigger state transitions.
+
+Here’s how you can translate the given PlantUML state diagram to Rebeca code. I'll outline the general approach and provide the code skeleton:
+
+    Define States: Use boolean variables in Rebeca to represent states.
+    Define Messages: Each transition triggered by a message in the PlantUML diagram becomes a message handler in Rebeca.
+    Handle State Transitions: In each message handler, update state variables and send messages to other objects as necessary.
+
+Rebeca Code Skeleton
+
+reactiveclass t1(5)
+{
+    state boolean onTheBridge = false;
+
+    msgsrv Passed() {
+        if (!onTheBridge) {
+            self.ReachBridge();
+        }
+    }
+
+    msgsrv ReachBridge() {
+        main.controller!Arrive(self);
+    }
+
+    msgsrv YouMayPass() {
+        onTheBridge = true;
+        main.controller!Leave(self);
+        self.ReachBridge();
+    }
+}
+
+reactiveclass t2(5)
+{
+    state boolean onTheBridge = false;
+
+    msgsrv Passed() {
+        if (!onTheBridge) {
+            self.ReachBridge();
+        }
+    }
+
+    msgsrv ReachBridge() {
+        main.controller!Arrive(self);
+    }
+
+    msgsrv YouMayPass() {
+        onTheBridge = true;
+        main.controller!Leave(self);
+        self.ReachBridge();
+    }
+}
+
+reactiveclass Controller(10)
+{
+    state boolean isOnBridge1 = false;
+    state boolean isOnBridge2 = false;
+    state boolean isWaiting1 = false;
+    state boolean isWaiting2 = false;
+
+    msgsrv Arrive(t1_t2 sender) {
+        if (sender == main.t1 && !isOnBridge1 && !isOnBridge2) {
+            isOnBridge1 = true;
+            main.t1!YouMayPass();
+        } else if (sender == main.t2 && !isOnBridge1 && !isOnBridge2) {
+            isOnBridge2 = true;
+            main.t2!YouMayPass();
+        } else if (sender == main.t2 && isOnBridge1 && !isOnBridge2) {
+            isWaiting2 = true;
+        } else if (sender == main.t1 && !isOnBridge1 && isOnBridge2) {
+            isWaiting1 = true;
+        }
+    }
+
+    msgsrv Leave(t1_t2 sender) {
+        if (sender == main.t1 && isOnBridge1) {
+            isOnBridge1 = false;
+            if (isWaiting2) {
+                isOnBridge2 = true;
+                isWaiting2 = false;
+                main.t2!YouMayPass();
+            }
+        } else if (sender == main.t2 && isOnBridge2) {
+            isOnBridge2 = false;
+            if (isWaiting1) {
+                isOnBridge1 = true;
+                isWaiting1 = false;
+                main.t1!YouMayPass();
+            }
+        }
+    }
+}
+
+main
+{
+    t1 t1():{};
+    t2 t2():{};
+    Controller controller():{};
+}
+
+This code skeleton sets up the basic message handling and state transitions as described in your PlantUML diagram. You might need to adapt or expand upon this depending on specific details or additional requirements not covered in your initial description.

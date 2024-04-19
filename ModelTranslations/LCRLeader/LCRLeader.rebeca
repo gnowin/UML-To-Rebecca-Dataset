@@ -7,7 +7,6 @@
 		int myNumber;
 		int currentLeader;		
 	}
-	
 	Node(byte n) {
 		myNumber = n;
 		currentLeader = n;
@@ -17,7 +16,6 @@
 	
 	msgsrv ImLeader() {
 		self.ImLeader();
-		//The algorithm terminates here, but the leader keeps sending a msg to himself to avoid deadlock.
 	}
 	msgsrv send() {
 		rightNode.receive(currentLeader);
@@ -32,14 +30,11 @@
 				currentLeader = n;
 				self.send();
 			}
-			//else discard
 		}
 	}
 }
 
-main { 
-//Each node must have a unique identifier
-//In case of having more than three nodes or changing the leader to other node (rather than node1), you should change the property file too.
+main {
    Node node0(node2):(4); 
    Node node1(node0):(20); 
    Node node2(node1):(10); 

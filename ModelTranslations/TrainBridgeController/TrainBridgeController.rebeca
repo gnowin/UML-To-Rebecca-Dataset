@@ -89,7 +89,7 @@ reactiveclass Train(3) {
 }
 
 main {
-	Train train2(theController):();
 	Train train1(theController):();
+	Train train2(theController):();
 	BridgeController theController(train1, train2):();
 }

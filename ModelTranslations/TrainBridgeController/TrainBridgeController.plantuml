@@ -4,15 +4,16 @@ hide empty description
 
 state t1{
 
-state t1_A : !onTheBridge
+t1_A : !onTheBridge
 
-state t1_B : onTheBridge
+t1_B : onTheBridge
 
-[*] -> t1_A
+[*] -> t1_A : self.Passed()
 
-t1_A -> t1_B : YouMayPass()
+t1_A -> t1_A : ReachBridge() \n (controller.Arrive())
+t1_A --> t1_B : YouMayPass() \n (self.Passed())
 
-t1_B -> t1_A : Passed()
+t1_B --> t1_A : Passed() \n (controller.Leave() \n self.ReachBridge())
 
 }
 
@@ -22,11 +23,12 @@ t2_A : !onTheBridge
 
 t2_B : onTheBridge
 
-[*] -> t2_A
+[*] -> t2_A : self.Passed()
 
-t2_A -> t2_B : YouMayPass()
+t2_A -> t2_A : ReachBridge() \n (controller.Arrive())
+t2_A --> t2_B : YouMayPass() \n (self.Passed())
 
-t2_B -> t2_A : Passed()
+t2_B --> t2_A : Passed() \n (controller.Leave() \n self.ReachBridge())
 
 }
 
@@ -57,13 +59,13 @@ State c_D : !isWaiting2
 
 [*] -> c_
 
-c_ --> c_A : arrive() \n (sender == t1 \n t1.YouMayPass())
+c_ --> c_A : Arrive() \n (sender == t1 \n t1.YouMayPass())
 
-c_ --> c_B : arrive() \n (sender == t2 \n t2.YouMayPass())
+c_ --> c_B : Arrive() \n (sender != t1 \n t2.YouMayPass())
 
-c_A --> c_C : arrive() \n (sender != t1 \n isWaiting2 = true)
+c_A --> c_C : Arrive() \n (sender != t1 \n isWaiting2 = true)
 
-c_B --> c_D : arrive() \n (sender == t1 \n isWaiting1 = true)
+c_B --> c_D : Arrive() \n (sender == t1 \n isWaiting1 = true)
 
 c_C --> c_B : Leave() \n (sender == t1 \n t2.YouMayPass())
 

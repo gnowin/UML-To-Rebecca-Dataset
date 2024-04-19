@@ -12,7 +12,7 @@ reactiveclass Philosopher(3)
 		boolean fL;
 		boolean fR;
 	}
-	msgsrv initial()
+	Philosopher()
 	{
 		fL = false;
 		fR = false;
@@ -38,7 +38,6 @@ reactiveclass Philosopher(3)
 				fR = true;
 				self.eat();
 			}
-			/* else discard the message */
 		}
 	}
 
@@ -73,7 +72,7 @@ reactiveclass Fork(3)
 		boolean leftReq;
 		boolean rightReq;
 	}
-	msgsrv initial()
+	Fork()
 	{ 
 		lAssign = false;
 		rAssign = false;
@@ -91,7 +90,6 @@ reactiveclass Fork(3)
 					philL.permit();
 				}
 			} 
-			/* else discard message */
 		}
 		else {
 			if (!rightReq) {
@@ -101,7 +99,6 @@ reactiveclass Fork(3)
 					philR.permit();
 				}
 			}
-			/* else discard message */
 		}
 	}
 	msgsrv release()

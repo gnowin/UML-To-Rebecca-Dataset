@@ -1,0 +1,15 @@
+Correct:
+Message servers are defined correctly.
+
+All message servers present in the generated code.
+
+Wrong:
+Queue size declaration is wrong. Instead of number there is "int id", which looks more like a parameter definition.
+
+There is a keyword "state" that is not defined in the Rebeca language. ChatGPT attempted to define the states of the PlantUML directly into the code.
+
+There is no constructor, but there seems to be for example "initial p_A { !eat; !fL; !fR; }" instead. It sets the variables to their correct initial value, but there are no defined statevars.
+
+The logic inside message servers are either missing, using "state" that does not exist or is wrong.
+
+Main is missing.

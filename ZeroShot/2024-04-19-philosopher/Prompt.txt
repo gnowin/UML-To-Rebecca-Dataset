@@ -1,0 +1,81 @@
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+@startuml
+
+hide empty description
+
+state Philosopher{
+
+State p_A : !eat
+State p_A : !fL
+State p_A : !fR
+
+State p_B : !eat
+State p_B : fL
+State p_B : !fR
+
+State p_C : !eat
+State p_C : fL
+State p_C : fR
+
+State p_D : eat
+State p_D : fL
+State p_D : fR
+
+[*] -> p_A
+
+p_A -> p_B : permit() (sender == forkL, forkR.request)
+
+p_B -> p_C : permit() (self.eat)
+
+p_C -> p_D : eat() (self.leave)
+
+p_D -> p_A : leave() (forkL.release(), forkR.release(), self.arrive())
+
+}
+
+state Fork{
+
+State F_ : !LA
+State F_ : !RA
+State F_ : !LR
+State F_ : !RR
+
+State F_A : LA
+State F_A : !RA
+State F_A : LR
+State F_A : !RR
+
+State F_B : LA
+State F_B : !RA
+
+State F_B : LR
+State F_B : RR
+
+State F_C : !LA
+State F_C : RA
+State F_C : LR
+State F_C : RR
+
+State F_D : !LA
+State F_D : RA
+State F_D : !LR
+State F_D : RR
+
+[*] -> F_
+
+F_ --> F_A : request() \n (sender == philL \n philL.permit())
+
+F_ --> F_D : request() \n (philR.permit())
+
+F_A --> F_B : request() \n (philR.permit())
+
+F_B --> F_D : release() \n (sender == philL && lAssign \n philR.permit())
+
+F_D --> F_C : request() \n (philL.permit())
+
+F_C --> F_A : release() \n (sender == philR && rAssign \n philL.permit())
+
+}
+
+@enduml 

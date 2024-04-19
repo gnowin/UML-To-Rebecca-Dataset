@@ -1,0 +1,101 @@
+To translate your PlantUML diagram to Rebeca (Reactive Objects Language) code, we'll create a model with reactive classes for both Philosopher and Fork, corresponding to the states and transitions defined in your diagram. In Rebeca, reactive systems are modeled as classes containing reactive methods that can be called upon receiving messages, and their behavior is defined using state variables and state transitions.
+
+Step 1: Defining the Philosopher Reactive Class
+
+Philosophers can be in one of four states and transition between these states by sending and receiving messages like permit(), eat(), and leave(). Each philosopher needs references to its left and right forks (forkL and forkR), which are used in conditions to check fork availability.
+
+reactiveclass Philosopher (int id)
+{
+    state p_A, p_B, p_C, p_D;
+
+    knownrebecs {
+        Fork forkL, forkR;
+    }
+
+    initial p_A {
+        !eat;
+        !fL;
+        !fR;
+    }
+
+    msgsrv permit() {
+        if (state == p_A && sender == forkL && forkR.request()) {
+            setState(p_B);
+        } else if (state == p_B && self.eat()) {
+            setState(p_C);
+        } else if (state == p_C && self.leave()) {
+            setState(p_D);
+        } else if (state == p_D && forkL.release() && forkR.release()) {
+            self.arrive();
+            setState(p_A);
+        }
+    }
+
+    msgsrv eat() {
+        if (state == p_C) {
+            // Additional eating logic if necessary
+        }
+    }
+
+    msgsrv leave() {
+        if (state == p_D) {
+            // Leaving logic
+        }
+    }
+
+    msgsrv arrive() {
+        if (state == p_D) {
+            // Arriving logic
+        }
+    }
+}
+
+Step 2: Defining the Fork Reactive Class
+
+Forks can also be in multiple states, defined by whether they are being held by the left or right philosophers (LA, RA) and their request and release state transitions.
+
+reactiveclass Fork (int id)
+{
+    state F_, F_A, F_B, F_C, F_D;
+
+    knownrebecs {
+        Philosopher philL, philR;
+    }
+
+    initial F_ {
+        !LA;
+        !RA;
+        !LR;
+        !RR;
+    }
+
+    msgsrv request() {
+        if (state == F_ && sender == philL && philL.permit()) {
+            setState(F_A);
+        } else if (state == F_ || sender == philR && philR.permit()) {
+            setState(F_D);
+        } else if (state == F_A && philR.permit()) {
+            setState(F_B);
+        } else if (state == F_B && sender == philL && lAssign && philR.permit()) {
+            setState(F_D);
+        } else if (state == F_D && philL.permit()) {
+            setState(F_C);
+        }
+    }
+
+    msgsrv release() {
+        if (state == F_B && sender == philL && lAssign && philR.permit()) {
+            setState(F_D);
+        } else if (state == F_C && sender == philR && rAssign && philL.permit()) {
+            setState(F_A);
+        }
+    }
+}
+
+Notes:
+
+    State Management: The states are declared within each reactive class and used to dictate behavior in message servers (msgsrv). Transitions are triggered based on the current state and the condition in the message serve.
+    Event and Condition Checking: Events are handled within message servers which also include conditions to check before transitioning states (like checking if the sender is the expected philosopher or if the other philosopher permits the action).
+    Synchronization: This model assumes certain synchronization and permission mechanisms that should be carefully implemented based on your application's concurrency requirements.
+
+This Rebeca code should be further refined and tested for correctness and synchronization issues according to your specific application's requirements and the Rebeca runtime environment.

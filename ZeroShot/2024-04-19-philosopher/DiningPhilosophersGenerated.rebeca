@@ -1,0 +1,83 @@
+reactiveclass Philosopher (int id)
+{
+    state p_A, p_B, p_C, p_D;
+
+    knownrebecs {
+        Fork forkL, forkR;
+    }
+
+    initial p_A {
+        !eat;
+        !fL;
+        !fR;
+    }
+
+    msgsrv permit() {
+        if (state == p_A && sender == forkL && forkR.request()) {
+            setState(p_B);
+        } else if (state == p_B && self.eat()) {
+            setState(p_C);
+        } else if (state == p_C && self.leave()) {
+            setState(p_D);
+        } else if (state == p_D && forkL.release() && forkR.release()) {
+            self.arrive();
+            setState(p_A);
+        }
+    }
+
+    msgsrv eat() {
+        if (state == p_C) {
+            // Additional eating logic if necessary
+        }
+    }
+
+    msgsrv leave() {
+        if (state == p_D) {
+            // Leaving logic
+        }
+    }
+
+    msgsrv arrive() {
+        if (state == p_D) {
+            // Arriving logic
+        }
+    }
+}
+
+reactiveclass Fork (int id)
+{
+    state F_, F_A, F_B, F_C, F_D;
+
+    knownrebecs {
+        Philosopher philL, philR;
+    }
+
+    initial F_ {
+        !LA;
+        !RA;
+        !LR;
+        !RR;
+    }
+
+    msgsrv request() {
+        if (state == F_ && sender == philL && philL.permit()) {
+            setState(F_A);
+        } else if (state == F_ || sender == philR && philR.permit()) {
+            setState(F_D);
+        } else if (state == F_A && philR.permit()) {
+            setState(F_B);
+        } else if (state == F_B && sender == philL && lAssign && philR.permit()) {
+            setState(F_D);
+        } else if (state == F_D && philL.permit()) {
+            setState(F_C);
+        }
+    }
+
+    msgsrv release() {
+        if (state == F_B && sender == philL && lAssign && philR.permit()) {
+            setState(F_D);
+        } else if (state == F_C && sender == philR && rAssign && philL.permit()) {
+            setState(F_A);
+        }
+    }
+}

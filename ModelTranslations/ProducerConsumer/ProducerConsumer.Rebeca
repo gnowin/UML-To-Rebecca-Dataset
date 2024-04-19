@@ -28,10 +28,9 @@ reactiveclass BufferManager(4) {
 		if (!full)	{
 			producer.produce(nextProduce);
 		} 
-		// re
-		/*else {
+		else {
 			producerWaiting = true;
-		}*/
+		}
 	}
 
 	msgsrv giveMeNextConsume() {

@@ -22,13 +22,13 @@ State p_D : fR
 
 [*] -> p_A
 
-p_A -> p_B : permit() (sender == forkL, forkR.request)
+p_A -> p_B : permit() (sender == forkL \n forkR.request)
 
 p_B -> p_C : permit() (self.eat)
 
 p_C -> p_D : eat() (self.leave)
 
-p_D -> p_A : leave() (forkL.release(), forkR.release(), self.arrive())
+p_D -> p_A : leave() (forkL.release() \n forkR.release() \n self.arrive())
 
 }
 

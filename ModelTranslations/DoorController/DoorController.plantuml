@@ -12,10 +12,10 @@ state T_3 : status
 state T_3 : isRun
 
 
-[*] -> T_2 : self.leaveStation()
-T_1 -> T_2 : LeaveStation() \n (controller.setTrainStatus(status, isRun) \n after(networkDelayTrain))
-T_2 -> T_3 : running() \n (controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.approachStation() after(runningTime))
-T_3 -> T_1 : approachStation() \n (controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.leaveStation() after(atStationTime))
+[*] -> T_2 : {self.leaveStation()}
+T_1 -> T_2 : LeaveStation() \n {controller.setTrainStatus(status, isRun) after(networkDelayTrain)}
+T_2 -> T_3 : running() \n {controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.approachStation() after(runningTime)}
+T_3 -> T_1 : approachStation() \n {controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.leaveStation() after(atStationTime)}
 }
 
 state Door{
@@ -30,19 +30,19 @@ state D_3 : isDoorLocked
 
 [*] -> D_1
 
-D_1 -> D_1 : lockDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n unlockDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n openDoor() \n (controller.setDoorStatus after(networkDelayDoor))
+D_1 -> D_1 : lockDoor() \n {controller.setDoorStatus after(networkDelayDoor)} \n unlockDoor() \n {controller.setDoorStatus after(networkDelayDoor)} \n openDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 
-D_1 --> D_2 : closeDoor() \n (controller.setDoorStatus(isDoorClosed, isDoorLocked)  after(networkDelayDoor))
+D_1 --> D_2 : closeDoor() \n {controller.setDoorStatus(isDoorClosed, isDoorLocked)  after(networkDelayDoor)}
 
-D_2 --> D_1 : openDoor() \n (controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor))
+D_2 --> D_1 : openDoor() \n {controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor)}
 
-D_2 -> D_2 : closeDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n unlockDoor() \n (controller.setDoorStatus after(networkDelayDoor))
+D_2 -> D_2 : closeDoor() \n {controller.setDoorStatus after(networkDelayDoor)} \n unlockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 
-D_2 --> D_3 : lockDoor() \n (controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor))
+D_2 --> D_3 : lockDoor() \n {controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor)}
 
-D_3 -> D_3 : lockDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n closeDoor() \n (controller.setDoorStatus after(networkDelayDoor)) \n openDoor() \n (controller.setDoorStatus after(networkDelayDoor))
+D_3 -> D_3 : lockDoor() \n {controller.setDoorStatus after(networkDelayDoor)} \n closeDoor() \n {controller.setDoorStatus after(networkDelayDoor)} \n openDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 
-D_3 --> D_2 : unlockDoor() \n (controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor))
+D_3 --> D_2 : unlockDoor() \n {controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor)}
 }
 
 state Controller{
@@ -85,40 +85,40 @@ state C_7 : !commandToMove
 
 [*] -> C_1
 
-C_1 -> C_1 : driveController() \n (door.closeDoor() after(networkDelayDoor) \n door.lockDoor() after(reactionDelay + networkDelayDoor) \n setDoorStatus(close, lock) \n (self.driveController()) \n setTrainStatus(status, isRunning) \n (self.driveController())
+C_1 -> C_1 : driveController() \n {door.closeDoor() after(networkDelayDoor) \n door.lockDoor() after(reactionDelay + networkDelayDoor)} \n setDoorStatus(close, lock) \n {self.driveController()} \n setTrainStatus(status, isRunning) \n {self.driveController()}
 
-C_1 --> C_2 : setDoorStatus(true, false) \n (self.driveController())
+C_1 --> C_2 : setDoorStatus(true, false) \n {self.driveController()}
 
-C_2 -> C_2 : driveController() \n (door.lockDoor() after(networkDelayDoor)  \n setDoorStatus(close, lock) \n (self.driveController()) \n setTrainStatus(status, isRunning) \n (self.driveController())
+C_2 -> C_2 : driveController() \n {door.lockDoor() after(networkDelayDoor)} \n setDoorStatus(close, lock) \n {self.driveController()} \n setTrainStatus(status, isRunning) \n (self.driveController()}
 
-C_2 --> C_3 : setDoorStatus(true, true) \n (self.driveController())
+C_2 --> C_3 : setDoorStatus(true, true) \n {self.driveController()}
 
-C_3 -> C_3 : driveController() \n (train.running() after(networkDelayTrain)  \n setDoorStatus(close, lock) \n (self.driveController()) \n setTrainStatus(status, isRunning) \n (self.driveController())
+C_3 -> C_3 : driveController() \n {train.running() after(networkDelayTrain}  \n setDoorStatus(close, lock) \n {self.driveController()} \n setTrainStatus(status, isRunning) \n {self.driveController()}
 
-C_3 --> C_4 : setTrainStatus(true, true) \n (self.driveController())
+C_3 --> C_4 : setTrainStatus(true, true) \n {self.driveController()}
 
-C_4 -> C_4 : driveController() \n () \n setDoorStatus(close, lock) \n (self.driveController()) \n setTrainStatus(status, isRunning) \n (self.driveController())
+C_4 -> C_4 : driveController() \n {} \n setDoorStatus(close, lock) \n {self.driveController()} \n setTrainStatus(status, isRunning) \n {self.driveController()}
 
-C_4 --> C_5 : setTrainStatus(false, false) \n (self.driveController())
+C_4 --> C_5 : setTrainStatus(false, false) \n {self.driveController()}
 
-C_5 -> C_5 : driveController() \n (door.unlockDoor() after(networkDelayDoor) \n door.openDoor() after(reactionDelay + networkDelayDoor)) \n setDoorStatus(close, lock) \n (self.driveController()) \n setTrainStatus(status, isRunning) \n (self.driveController())
+C_5 -> C_5 : driveController() \n {door.unlockDoor() after(networkDelayDoor) \n door.openDoor() after(reactionDelay + networkDelayDoor)} \n setDoorStatus(close, lock) \n {self.driveController()} \n setTrainStatus(status, isRunning) \n {self.driveController()}
 
-C_5 --> C_6 : setDoorStatus(true, false) \n (driveController())
+C_5 --> C_6 : setDoorStatus(true, false) \n {driveController()}
 
-C_6 -> C_6 : driveController() \n (door.openDoor() after(reactionDelay + networkDelayDoor)) \n setDoorStatus(close, lock) \n (self.driveController()) \n setTrainStatus(status, isRunning) \n (self.driveController())
+C_6 -> C_6 : driveController() \n {door.openDoor() after(reactionDelay + networkDelayDoor)} \n setDoorStatus(close, lock) \n {self.driveController()} \n setTrainStatus(status, isRunning) \n {self.driveController()}
 
-C_6 --> C_7 : setDoorStatus(false, false) \n (driveController())
+C_6 --> C_7 : setDoorStatus(false, false) \n {driveController()}
 
-C_7 -> C_7 : driveController() \n () \n setDoorStatus(close, lock) \n (self.driveController()) \n setTrainStatus(status, isRunning) \n (self.driveController())
+C_7 -> C_7 : driveController() \n {} \n setDoorStatus(close, lock) \n {self.driveController()} \n setTrainStatus(status, isRunning) \n {self.driveController()}
 
-C_7 --> C_1 : setTrainStatus(true, false) \n (driveController())
+C_7 --> C_1 : setTrainStatus(true, false) \n {driveController()}
 
 }
 
-state Passanger{
+state Passenger{
 state P : P
 
-[*] -> P : self.passengerOpenDoor() after(passengerPeriod)
-P -> P : passengerOpenDoor() \n (door.openDoor() \n self.passengerOpenDoor() after(passengerPeriod))
+[*] -> P : {self.passengerOpenDoor() after(passengerPeriod)}
+P -> P : passengerOpenDoor() \n {door.openDoor() \n self.passengerOpenDoor() after(passengerPeriod)}
 }
 @enduml

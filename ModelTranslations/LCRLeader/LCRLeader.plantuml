@@ -7,10 +7,10 @@ state node{
 
     state node_B : isLeader
 
-    [*] -> node_A : self.send()
-    node_A -> node_A : recieve(n) \n (n > currentLeader \n currentLeader = n \n self.send()) \n send() \n (rightNode.recieve(currentLeader))
-    node_A --> node_B : recieve(n) \n (n == myNumber \n self.ImLeader())
-    node_B -> node_B : self.ImLeader()
+    [*] -> node_A : {self.send()}
+    node_A -> node_A : recieve(n) \n {n > currentLeader \n currentLeader = n \n self.send()} \n send() \n {rightNode.recieve(currentLeader)}
+    node_A --> node_B : recieve(n) \n {n == myNumber \n self.ImLeader()}
+    node_B -> node_B : self.ImLeader() \n {self.ImLeader()}
 
 }
 

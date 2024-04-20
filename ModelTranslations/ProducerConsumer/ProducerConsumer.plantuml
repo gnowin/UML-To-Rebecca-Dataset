@@ -31,38 +31,38 @@ state BufferManager {
     
     [*] -> bf_A
 
-    bf_A -> bf_A : giveMeNextProduce() \n (producer.produce(nextProduce))
+    bf_A -> bf_A : giveMeNextProduce() \n {producer.produce(nextProduce)}
 
-    bf_A -up-> bf_B : giveMeNextConsume() \n ()
-    bf_B -down-> bf_A : ackProduce() \n (consumer.consume(nextConsume))
+    bf_A -up-> bf_B : giveMeNextConsume() \n {}
+    bf_B -down-> bf_A : ackProduce() \n {consumer.consume(nextConsume)}
    
-    bf_B -> bf_B : giveMeNextProduce() \n (producer.produce(nextProduce))
+    bf_B -> bf_B : giveMeNextProduce() \n {producer.produce(nextProduce)}
 
-    bf_A --> bf_C : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength)
-    bf_C -left-> bf_A : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce)
+    bf_A --> bf_C : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength}
+    bf_C -left-> bf_A : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce}
 
-    bf_C -> bf_C : giveMeNextProduce() \n (producer.produce(nextProduce)) \n giveMeNextConsume() \n (consumer.consume(nextConsume))
+    bf_C -> bf_C : giveMeNextProduce() \n {producer.produce(nextProduce)} \n giveMeNextConsume() \n {consumer.consume(nextConsume)}
 
-    bf_C --> bf_D : ackProduce() \n (nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume)
-    bf_D --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce))
+    bf_C --> bf_D : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume}
+    bf_D --> bf_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
 
-    bf_D --> bf_E : giveMeNextProduce() \n ()
-    bf_E --> bf_C : ackConsume() \n (nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce))
+    bf_D --> bf_E : giveMeNextProduce() \n {}
+    bf_E --> bf_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
 }
 
 state Producer{
 
     state p_A
 
-    [*] -> p_A : self.beginProduce()
-    p_A -> p_A : produce(int bufNum) \n (buffer.ackProduce() \n self.beginProduce()) \n beginProduce() \n (buffer.giveMeNextProduce())
+    [*] -> p_A : {self.beginProduce()}
+    p_A -> p_A : produce(int bufNum) \n {buffer.ackProduce() \n self.beginProduce()} \n beginProduce() \n {buffer.giveMeNextProduce()}
 }
 
 state Consumer{
     state c_A
 
-    [*] -> c_A : self.beginConsume()
-    c_A -> c_A : consume(int bufNum) \n (buffer.ackConsume() \n self.beginConsume()) \n beginConsume() \n (buffer.giveMeNextConsume())
+    [*] -> c_A : {self.beginConsume()}
+    c_A -> c_A : consume(int bufNum) \n {buffer.ackConsume() \n self.beginConsume()} \n beginConsume() \n {buffer.giveMeNextConsume()}
 }
 
 @enduml

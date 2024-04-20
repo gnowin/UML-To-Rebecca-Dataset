@@ -22,13 +22,13 @@ State p_D : fR
 
 [*] -> p_A
 
-p_A -> p_B : permit() (sender == forkL \n forkR.request)
+p_A -> p_B : permit() {sender == forkL \n forkR.request}
 
-p_B -> p_C : permit() (self.eat)
+p_B -> p_C : permit() {self.eat}
 
-p_C -> p_D : eat() (self.leave)
+p_C -> p_D : eat() {self.leave}
 
-p_D -> p_A : leave() (forkL.release() \n forkR.release() \n self.arrive())
+p_D -> p_A : leave() {forkL.release() \n forkR.release() \n self.arrive()}
 
 }
 
@@ -62,17 +62,17 @@ State F_D : RR
 
 [*] -> F_
 
-F_ --> F_A : request() \n (sender == philL \n philL.permit())
+F_ --> F_A : request() \n {sender == philL \n philL.permit()}
 
-F_ --> F_D : request() \n (philR.permit())
+F_ --> F_D : request() \n {philR.permit()}
 
-F_A --> F_B : request() \n (philR.permit())
+F_A --> F_B : request() \n {philR.permit()}
 
-F_B --> F_D : release() \n (sender == philL && lAssign \n philR.permit())
+F_B --> F_D : release() \n {sender == philL && lAssign \n philR.permit()}
 
-F_D --> F_C : request() \n (philL.permit())
+F_D --> F_C : request() \n {philL.permit()}
 
-F_C --> F_A : release() \n (sender == philR && rAssign \n philL.permit())
+F_C --> F_A : release() \n {sender == philR && rAssign \n philL.permit()}
 
 }
 

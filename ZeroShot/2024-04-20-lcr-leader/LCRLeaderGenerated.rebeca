@@ -1,0 +1,34 @@
+reactiveclass Node (int myNumber)
+{
+    state non_leader, leader;
+    
+    knownrebecs {
+        Node rightNode;
+    }
+
+    int currentLeader = 0;
+
+    Node() {
+        self.send();
+        setState(non_leader);
+    }
+
+    msgsrv send() {
+        rightNode.receive(currentLeader);
+    }
+
+    msgsrv receive(int n) {
+        if (n > currentLeader) {
+            currentLeader = n;
+            self.send();
+        }
+        if (n == myNumber) {
+            self.ImLeader();
+        }
+    }
+
+    msgsrv ImLeader() {
+        setState(leader);
+        // Additional logic for leader
+    }
+}

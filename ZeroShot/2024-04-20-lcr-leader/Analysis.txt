@@ -1,0 +1,15 @@
+Correct:
+knownrebec is defined correctly.
+
+Constructor was done done with the correct syntax, but missed parameter "byte n".
+
+If statement logic is correct in recieve.
+
+Wrong:
+No statevars were generated and also not instantiated in the constructor.
+
+Tries to set a value for currentLeader, but it is not done as a statevar or with the right value.
+
+Uses "state" keyword that does not exist (at least not in newest rebeca version).
+
+Using keyword "setState" that does not exist.

@@ -40,12 +40,11 @@ reactiveclass Controller(23){
 				if(!isClosed)	
 					door.closeDoor() after(networkDelayDoor);
 				if(!isLocked)
-					door.lockDoor()             
-					after(reactionDelay  + networkDelayDoor);
+					door.lockDoor() after(reactionDelay  + networkDelayDoor);
 			}         
 			if(isClosed && isLocked && !commandToMove)
 				train.running() after(networkDelayTrain);
-		}// end of if(trainStatus)
+		}
 		else if(!trainStatus){ // arrive to the station
 			if(isClosed || isLocked) {
 			   if(isLocked)
@@ -53,9 +52,9 @@ reactiveclass Controller(23){
 			if(isClosed)
 				door.openDoor()after(reactionDelay  + networkDelayDoor);
 			}  
-		}// end of else if(!trainStatus)
-	} // end of driveController()
-} //end of the Controller class 
+		}
+	}
+}
 
 
 reactiveclass Train(5){
@@ -90,7 +89,7 @@ reactiveclass Train(5){
 		controller.setTrainStatus(status, isRun) after(networkDelayTrain);
 		self.leaveStation() after(atStationTime);
 	}
-} //end of the Train 
+}
 
 reactiveclass Door(15){
 	knownrebecs{
@@ -110,8 +109,7 @@ reactiveclass Door(15){
 		after(networkDelayDoor);
 	}
 	msgsrv lockDoor(){
-		if (isDoorClosed){            
-		// The door is only locked if the door is closed.
+		if (isDoorClosed){
 			isDoorLocked = true;
 		}
 		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
@@ -120,13 +118,13 @@ reactiveclass Door(15){
 		isDoorLocked = false;
 		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
 	}
-	msgsrv openDoor(){// The door is only opened if the door is not locked.
+	msgsrv openDoor(){
 		if(!isDoorLocked){
 			isDoorClosed = false;
 		}
 		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
 	}
-} //end of the Door class
+}
 
 reactiveclass Passenger(5){
 	knownrebecs{Door door;} 
@@ -135,11 +133,11 @@ reactiveclass Passenger(5){
 	msgsrv passengerOpenDoor(){door.openDoor();
 		self.passengerOpenDoor() after(passengerPeriod);
 	}
-} //end of the Passenger class
+}
 main {
 	Controller controller(door, train):();
 	Door door(controller):();       
 	Train train(controller):();
 	Passenger passenger(door):();
-} 
+}
 	

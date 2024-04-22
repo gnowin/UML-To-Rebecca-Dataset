@@ -1,0 +1,415 @@
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+state Philosopher{
+
+State p_A : !eat
+State p_A : !fL
+State p_A : !fR
+
+State p_B : !eat
+State p_B : fL
+State p_B : !fR
+
+State p_C : !eat
+State p_C : fL
+State p_C : fR
+
+State p_D : eat
+State p_D : fL
+State p_D : fR
+
+[*] -> p_A
+
+p_A -> p_B : permit() {sender == forkL \n forkR.request}
+
+p_B -> p_C : permit() {self.eat}
+
+p_C -> p_D : eat() {self.leave}
+
+p_D -> p_A : leave() {forkL.release() \n forkR.release() \n self.arrive()}
+
+}
+
+state Fork{
+
+State F_ : !LA
+State F_ : !RA
+State F_ : !LR
+State F_ : !RR
+
+State F_A : LA
+State F_A : !RA
+State F_A : LR
+State F_A : !RR
+
+State F_B : LA
+State F_B : !RA
+
+State F_B : LR
+State F_B : RR
+
+State F_C : !LA
+State F_C : RA
+State F_C : LR
+State F_C : RR
+
+State F_D : !LA
+State F_D : RA
+State F_D : !LR
+State F_D : RR
+
+[*] -> F_
+
+F_ --> F_A : request() \n {sender == philL \n philL.permit()}
+
+F_ --> F_D : request() \n {philR.permit()}
+
+F_A --> F_B : request() \n {philR.permit()}
+
+F_B --> F_D : release() \n {sender == philL && lAssign \n philR.permit()}
+
+F_D --> F_C : request() \n {philL.permit()}
+
+F_C --> F_A : release() \n {sender == philR && rAssign \n philL.permit()}
+
+}
+
+@enduml
+Output:
+
+reactiveclass Philosopher(3)
+{
+	knownrebecs
+	{
+		Fork forkL;
+		Fork forkR;
+	}
+	statevars
+	{
+		boolean eating;
+		boolean fL;
+		boolean fR;
+	}
+	Philosopher()
+	{
+		fL = false;
+		fR = false;
+		eating = false;
+		self.arrive();
+	}
+
+	msgsrv arrive()
+	{
+		forkL.request();
+	}
+
+	msgsrv permit()
+	{
+		if (sender == forkL) {
+			if (!fL) {
+				fL = true;
+				forkR.request();
+			}
+		}
+		else {
+			if (fL && !(fR)) {
+				fR = true;
+				self.eat();
+			}
+		}
+	}
+
+	msgsrv eat()
+	{
+		eating = true;
+		self.leave();
+	}
+
+	msgsrv leave()
+	{
+		fL = false;
+		fR = false;
+		eating = false;
+		forkL.release();
+		forkR.release();
+		self.arrive();
+	}
+}
+
+reactiveclass Fork(3)
+{
+	knownrebecs
+	{
+		Philosopher philL;
+		Philosopher philR;
+	}
+	statevars
+	{
+		boolean lAssign;	
+		boolean rAssign;	
+		boolean leftReq;
+		boolean rightReq;
+	}
+	Fork()
+	{ 
+		lAssign = false;
+		rAssign = false;
+		leftReq = false;
+		rightReq = false;
+	}
+
+	msgsrv request()
+	{
+		if (sender == philL) {
+			if (!leftReq) {
+				leftReq = true;
+				if (!rAssign) {
+					lAssign = true;
+					philL.permit();
+				}
+			} 
+		}
+		else {
+			if (!rightReq) {
+				rightReq = true;
+				if (!lAssign) {
+					rAssign = true;
+					philR.permit();
+				}
+			}
+		}
+	}
+	msgsrv release()
+	{
+		if (sender == philL && lAssign){
+			leftReq = false;
+			lAssign = false;
+			if (rightReq) {
+				rAssign=true;
+				philR.permit();
+			}
+		}
+		if (sender == philR && rAssign){
+			rAssign = false;
+			rightReq = false;
+			if (leftReq) {
+				lAssign=true;
+				philL.permit();
+			}
+		}
+	}
+}
+
+main
+{
+       Philosopher phil0(fork0, fork2):();
+       Philosopher phil1(fork0, fork1):();
+       Philosopher phil2(fork1, fork2):();
+
+       Fork fork0(phil0, phil1):();
+       Fork fork1(phil1, phil2):();
+       Fork fork2(phil2, phil0):();
+}
+
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+state t1{
+
+t1_A : !onTheBridge
+
+t1_B : onTheBridge
+
+[*] -> t1_A : {self.Passed()}
+
+t1_A -> t1_A : ReachBridge() \n {controller.Arrive()}
+t1_A --> t1_B : YouMayPass() \n {self.Passed()}
+
+t1_B --> t1_A : Passed() \n {controller.Leave() \n self.ReachBridge()}
+
+}
+
+state t2{
+
+t2_A : !onTheBridge
+
+t2_B : onTheBridge
+
+[*] -> t2_A : {self.Passed()}
+
+t2_A -> t2_A : ReachBridge() \n {controller.Arrive()}
+t2_A --> t2_B : YouMayPass() \n {self.Passed()}
+
+t2_B --> t2_A : Passed() \n {controller.Leave() \n self.ReachBridge()}
+
+}
+
+state controller{
+
+State c_ : !isOnBridge1
+State c_ : !isOnBridge2
+State c_ : !isWaiting1
+State c_ : !isWaiting2
+
+State c_A : isOnBridge1
+State c_A : !isOnBridge2
+State c_A : !isWaiting1
+State c_A : !isWaiting2
+
+State c_B : !isOnBridge1
+State c_B : isOnBridge2
+State c_B : !isWaiting1
+State c_B : !isWaiting2
+State c_C : isOnBridge1
+State c_C : !isOnBridge2
+State c_C : !isWaiting1
+State c_C : isWaiting2
+State c_D : !isOnBridge1
+State c_D : isOnBridge2
+State c_D : isWaiting1
+State c_D : !isWaiting2
+
+[*] -> c_
+
+c_ --> c_A : Arrive() \n {sender == t1 \n t1.YouMayPass()}
+
+c_ --> c_B : Arrive() \n {sender != t1 \n t2.YouMayPass()}
+
+c_A --> c_C : Arrive() \n {sender != t1 \n isWaiting2 = true}
+
+c_B --> c_D : Arrive() \n {sender == t1 \n isWaiting1 = true}
+
+c_C --> c_B : Leave() \n {sender == t1 \n t2.YouMayPass()}
+
+c_D --> c_A : Leave \n {sender != t1 \n t1.YouMayPass()}
+
+}
+
+@enduml 
+Output:
+reactiveclass BridgeController(5) {
+	knownrebecs {
+		Train t1;
+		Train t2;
+	}
+
+	statevars {
+		boolean isWaiting1;
+		boolean isWaiting2;
+		boolean isOnBridge1;
+		boolean isOnBridge2;
+	}
+
+	BridgeController() {
+		isOnBridge1 = false;
+		isOnBridge2 = false;
+		isWaiting1 = false;
+		isWaiting2 = false;
+	}
+	
+	msgsrv Arrive() {
+		if (sender == t1){
+			if (isOnBridge2 == false) {
+				isOnBridge1 = true;
+				t1.YouMayPass();
+			}
+			else {
+				isWaiting1 = true;
+			}
+		}
+		else {
+			if (isOnBridge1 == false){
+				isOnBridge2 = true;
+				t2.YouMayPass();
+			}
+			else{
+				isWaiting2 = true;
+			}
+		}
+	}
+	
+	msgsrv Leave() {
+		if (sender == t1) {
+			isOnBridge1 = false;
+			if (isWaiting2){
+				isOnBridge2 = true;
+				t2.YouMayPass();
+				isWaiting2 = false;
+			}
+		} else {
+			isOnBridge2 = false;
+			if (isWaiting1) {
+				isOnBridge1 = true;
+				t1.YouMayPass();
+				isWaiting1 = false;
+			}
+		}
+	}
+}
+
+reactiveclass Train(3) {
+	knownrebecs {
+		BridgeController controller;
+	}
+
+	statevars {
+		boolean onTheBridge;
+	}
+
+	Train() {
+		onTheBridge = false;
+		self.Passed();
+	}
+
+	msgsrv YouMayPass() {
+		onTheBridge = true;
+		self.Passed();
+	}
+	
+	msgsrv Passed() {
+		onTheBridge = false;
+		controller.Leave();
+		self.ReachBridge();
+	}
+
+	msgsrv ReachBridge() {
+		controller.Arrive();
+	}
+}
+
+main {
+	Train train1(theController):();
+	Train train2(theController):();
+	BridgeController theController(train1, train2):();
+}
+
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+state node{
+    state node_A : !isLeader
+
+    state node_B : isLeader
+
+    [*] -> node_A : {self.send()}
+    node_A -> node_A : recieve(n) \n {n > currentLeader \n currentLeader = n \n self.send()} \n send() \n {rightNode.recieve(currentLeader)}
+    node_A --> node_B : recieve(n) \n {n == myNumber \n self.ImLeader()}
+    node_B -> node_B : self.ImLeader() \n {self.ImLeader()}
+
+}
+
+@enduml
+Output:

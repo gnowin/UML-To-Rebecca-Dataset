@@ -1,0 +1,22 @@
+Correct:
+All message servers, statevariables and knownrebecs are present.
+
+The logic of the model is correct in all places but those mentioned in "wrong".
+
+Wrong:
+Queue size is set to be too small (2 instead of 8 in original file). Would give queue overflow if model had working syntax.
+
+Set currentLeader = 0 instead of currentLeader = n in constructor. This causes model to have deadlock.
+
+ImLeader() does not loop into itself to avoid deadlock.
+
+In main, the parameters are reversed. Example is "Node node2(2):(node1);" instead of "Node node2(node1):(2);".
+
+Also in main, node1 is missing a rightNode in its knownrebec parameter and instead has a wrong syntax reference with "node1.rightNode = node3;" which does not compile. The coupling of the nodes would be correct if it wasnt for the wrong syntax.
+
+Notes:
+Syntax was corrected and tested the logic of the generated model to anylize further what was correct and wrong. The model worked after just chaning currentLeader = n, queuesize in reactiveclass to a higher value (tested 4 and worked, 8 is set in original code) and added that ImLeader() loops into itself.
+
+Uses int instead of byte in parameter for constructor.
+
+Some of the if statements are done slightly differently but essentially achieves the same thing.

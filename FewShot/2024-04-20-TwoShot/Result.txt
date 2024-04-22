@@ -1,0 +1,56 @@
+Here's the translated Rebeca code from the provided PlantUML diagram of the node state transitions:
+
+reactiveclass Node(2) {
+    knownrebecs {
+        Node rightNode;
+    }
+
+    statevars {
+        boolean isLeader;
+        int currentLeader;
+        int myNumber;
+    }
+
+    Node(int myNumber) {
+        this.myNumber = myNumber;
+        isLeader = false;
+        currentLeader = 0;
+        self.send();
+    }
+
+    msgsrv send() {
+        rightNode.receive(currentLeader);
+    }
+
+    msgsrv receive(int n) {
+        if (n > currentLeader) {
+            currentLeader = n;
+            self.send();
+        } else if (n == myNumber) {
+            self.ImLeader();
+        }
+    }
+
+    msgsrv ImLeader() {
+        isLeader = true;
+    }
+}
+
+main {
+    Node node1(1):();
+    Node node2(2):(node1);
+    Node node3(3):(node2);
+
+    node1.rightNode = node3; // This creates a circular structure in a ring topology.
+}
+
+Explanation:
+
+    Reactive Class: Node defines a reactive object with a known rebec (connection) to another node, simulating the connection in a distributed system or network.
+    State Variables: Includes variables for leadership status (isLeader), the highest leader number seen (currentLeader), and the node's own number (myNumber).
+    Constructor and Initial Messages: The constructor initializes the node with a given number, sets the leadership status to false, and sends the initial current leader value to the next node.
+    Message-Serving Functions (msgsrv):
+        send(): Propagates the current leader value to the next node in the ring.
+        receive(int n): Handles the reception of a leader number. If the received number is greater than the current leader, it updates and sends it again. If the number matches the node's number, it triggers the ImLeader() function to declare itself as the leader.
+        ImLeader(): Marks the node as the leader.
+    Main Setup: Creates instances of the Node class in a ring topology, linking each node to another to form a circular network, allowing message passing mimicking election algorithms in distributed systems.

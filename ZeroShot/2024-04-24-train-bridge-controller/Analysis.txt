@@ -1,0 +1,30 @@
+Correct:
+
+Created one class for train
+
+Knowrebecs defiend correcly in train
+
+The logic and if statements seem to mostly be correct. If the syntax worked, then the model might too.
+
+Wrong:
+
+No constructors.
+
+statevars not defined correctly. Using keyword "state" (old syntax)?
+
+reactiveclasses defines queue size false
+
+No knownrebecs defined in controller.
+
+knownrebecs.train1.YouMayPass(); instead of t2.YouMayPass();
+
+
+main is close to correct,     
+    Controller c();
+    Train train1(1)(c);
+    Train train2(2)(c);
+
+Instead of;
+    Train train1(theController):();
+    Train train2(theController):();
+    BridgeController theController(train1, train2):(); 

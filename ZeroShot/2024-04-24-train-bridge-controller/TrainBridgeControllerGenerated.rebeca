@@ -1,0 +1,73 @@
+reactiveclass Train(int rid) {
+    knownrebecs {
+        Controller controller;
+    }
+    state {
+        boolean onTheBridge = false;
+    }
+    
+    msgsrv Passed() {
+        onTheBridge = false;
+        controller.Leave(rid);
+        self.ReachBridge();
+    }
+
+    msgsrv ReachBridge() {
+        controller.Arrive(rid);
+    }
+
+    msgsrv YouMayPass() {
+        onTheBridge = true;
+        self.Passed();
+    }
+}
+reactiveclass Controller() {
+    state {
+        boolean isOnBridge1 = false;
+        boolean isOnBridge2 = false;
+        boolean isWaiting1 = false;
+        boolean isWaiting2 = false;
+    }
+
+    msgsrv Arrive(int trainId) {
+        if(trainId == 1) {
+            if(!isOnBridge1 && !isOnBridge2) {
+                isOnBridge1 = true;
+                knownrebecs.train1.YouMayPass();
+            } else {
+                isWaiting1 = true;
+            }
+        } else if(trainId == 2) {
+            if(!isOnBridge1 && !isOnBridge2) {
+                isOnBridge2 = true;
+                knownrebecs.train2.YouMayPass();
+            } else {
+                isWaiting2 = true;
+            }
+        }
+    }
+
+    msgsrv Leave(int trainId) {
+        if(trainId == 1) {
+            isOnBridge1 = false;
+            if(isWaiting2) {
+                isWaiting2 = false;
+                isOnBridge2 = true;
+                knownrebecs.train2.YouMayPass();
+            }
+        } else if(trainId == 2) {
+            isOnBridge2 = false;
+            if(isWaiting1) {
+                isWaiting1 = false;
+                isOnBridge1 = true;
+                knownrebecs.train1.YouMayPass();
+            }
+        }
+    }
+}
+
+main {
+    Controller c();
+    Train train1(1)(c);
+    Train train2(2)(c);
+}

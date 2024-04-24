@@ -1,0 +1,63 @@
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+@startuml
+
+hide empty description
+
+
+state Train{
+
+t_A : !onTheBridge
+
+t_B : onTheBridge
+
+[*] -> t_A : {self.Passed()}
+
+t_A -> t_A : ReachBridge() \n {controller.Arrive()}
+t_A --> t_B : YouMayPass() \n {self.Passed()}
+
+t_B --> t_A : Passed() \n {controller.Leave() \n self.ReachBridge()}
+
+}
+
+state Controller{
+
+State c_ : !isOnBridge1
+State c_ : !isOnBridge2
+State c_ : !isWaiting1
+State c_ : !isWaiting2
+
+State c_A : isOnBridge1
+State c_A : !isOnBridge2
+State c_A : !isWaiting1
+State c_A : !isWaiting2
+
+State c_B : !isOnBridge1
+State c_B : isOnBridge2
+State c_B : !isWaiting1
+State c_B : !isWaiting2
+State c_C : isOnBridge1
+State c_C : !isOnBridge2
+State c_C : !isWaiting1
+State c_C : isWaiting2
+State c_D : !isOnBridge1
+State c_D : isOnBridge2
+State c_D : isWaiting1
+State c_D : !isWaiting2
+
+[*] -> c_
+
+c_ --> c_A : Arrive() \n {sender == (Train t1) \n (Train t1).YouMayPass()}
+
+c_ --> c_B : Arrive() \n {sender != (Train t1) \n (Train t2).YouMayPass()}
+
+c_A --> c_C : Arrive() \n {sender != (Train t1) \n isWaiting2 = true}
+
+c_B --> c_D : Arrive() \n {sender == (Train t1) \n isWaiting1 = true}
+
+c_C --> c_B : Leave() \n {sender == (Train t1) \n (Train t2).YouMayPass()}
+
+c_D --> c_A : Leave \n {sender != (Train t1) \n (Train t1).YouMayPass()}
+
+}
+
+@enduml 

@@ -1,0 +1,93 @@
+To translate the provided PlantUML diagram to Rebeca (Reactive Objects Language) code, we first need to understand the structure and logic of both the Train and Controller as states and transitions in the diagram. I'll map each state and transition into Rebeca's syntax, which uses reactive classes to model behavior.
+
+Train Reactive Class
+The Train class in Rebeca will model the states and transitions illustrated in the diagram. Each train can either be off the bridge (t_A) or on the bridge (t_B). Transitions between these states are triggered by messages like ReachBridge(), YouMayPass(), and Passed().
+
+reactiveclass Train(int rid) {
+    knownrebecs {
+        Controller controller;
+    }
+    state {
+        boolean onTheBridge = false;
+    }
+    
+    msgsrv Passed() {
+        onTheBridge = false;
+        controller.Leave(rid);
+        self.ReachBridge();
+    }
+
+    msgsrv ReachBridge() {
+        controller.Arrive(rid);
+    }
+
+    msgsrv YouMayPass() {
+        onTheBridge = true;
+        self.Passed();
+    }
+}
+
+
+Controller Reactive Class
+The Controller class manages the state of the bridge, keeping track of which train is on the bridge and whether any are waiting. The states (c_, c_A, c_B, c_C, c_D) depend on which train is on the bridge and which is waiting.
+
+reactiveclass Controller() {
+    state {
+        boolean isOnBridge1 = false;
+        boolean isOnBridge2 = false;
+        boolean isWaiting1 = false;
+        boolean isWaiting2 = false;
+    }
+
+    msgsrv Arrive(int trainId) {
+        if(trainId == 1) {
+            if(!isOnBridge1 && !isOnBridge2) {
+                isOnBridge1 = true;
+                knownrebecs.train1.YouMayPass();
+            } else {
+                isWaiting1 = true;
+            }
+        } else if(trainId == 2) {
+            if(!isOnBridge1 && !isOnBridge2) {
+                isOnBridge2 = true;
+                knownrebecs.train2.YouMayPass();
+            } else {
+                isWaiting2 = true;
+            }
+        }
+    }
+
+    msgsrv Leave(int trainId) {
+        if(trainId == 1) {
+            isOnBridge1 = false;
+            if(isWaiting2) {
+                isWaiting2 = false;
+                isOnBridge2 = true;
+                knownrebecs.train2.YouMayPass();
+            }
+        } else if(trainId == 2) {
+            isOnBridge2 = false;
+            if(isWaiting1) {
+                isWaiting1 = false;
+                isOnBridge1 = true;
+                knownrebecs.train1.YouMayPass();
+            }
+        }
+    }
+}
+
+Main Block
+The main block of a Rebeca model instantiates the reactive objects and sets up their initial state and known rebecs (connections to other reactive objects).
+
+main {
+    Controller c();
+    Train train1(1)(c);
+    Train train2(2)(c);
+}
+This translation maps the behavior described by the UML state diagram into Rebeca's model of reactive classes, focusing on message passing and state changes. Each reactive class corresponds to an entity in the UML diagram, and each message service (msgsrv) represents a transition triggered by an event.
+
+
+
+
+
+

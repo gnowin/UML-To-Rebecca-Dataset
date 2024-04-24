@@ -1,0 +1,14 @@
+property{
+	define {
+		//appm5free = rm.appMaster5 == 1;
+		//appm5busy = rm.appMaster5 == 0;
+		doneJobs1 = am1.doneJobs > 4;
+		//doneJobs2 = am2.doneJobs > 4;
+		//doneJobs3 = am3.doneJobs > 4;
+	}
+
+	TCTL {
+		//prop1 : EU(time <= 10, appm5free, appm5busy);
+		prop1 : EU(time <= 10, !doneJobs1, doneJobs1);		
+	}
+}

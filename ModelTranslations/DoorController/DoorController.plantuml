@@ -91,45 +91,45 @@ state C_7 : !commandToMove
 [*] -> C_1
 
 C_1 -> C_1 : driveController() \n {door.closeDoor() after(networkDelayDoor) \n door.lockDoor() after(reactionDelay + networkDelayDoor)}
-C_1 -> C_1 : setDoorStatus(close, lock) \n {self.driveController()}
-C_1 -> C_1 : setTrainStatus(status, isRunning) \n {self.driveController()}
+C_1 -> C_1 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_1 -> C_1 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
 
-C_1 --> C_2 : setDoorStatus(true, false) \n {self.driveController()}
+C_1 --> C_2 : setDoorStatus(boolean close, boolean lock) \n {close == true && lock == false, self.driveController()}
 
 C_2 -> C_2 : driveController() \n {door.lockDoor() after(networkDelayDoor)}
-C_2 -> C_2 : setDoorStatus(close, lock) \n {self.driveController()}
-C_2 -> C_2 : setTrainStatus(status, isRunning) \n (self.driveController()}
+C_2 -> C_2 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_2 -> C_2 : setTrainStatus(boolean status, boolean isRunning) \n (self.driveController()}
 
-C_2 --> C_3 : setDoorStatus(true, true) \n {self.driveController()}
+C_2 --> C_3 : setDoorStatus(boolean close, boolean lock) \n {close == true && lock == true, self.driveController()}
 
 C_3 -> C_3 : driveController() \n {train.running() after(networkDelayTrain}
-C_3 -> C_3 : setDoorStatus(close, lock) \n {self.driveController()}
-C_3 -> C_3 : setTrainStatus(status, isRunning) \n {self.driveController()}
+C_3 -> C_3 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_3 -> C_3 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
 
-C_3 --> C_4 : setTrainStatus(true, true) \n {self.driveController()}
+C_3 --> C_4 : setTrainStatus(boolean status, boolean isRunning) \n {status == true && isRunning == true, self.driveController()}
 
-C_4 -> C_4 : driveController() \n {} \n setDoorStatus(close, lock) \n {self.driveController()}
-C_4 -> C_4 : setTrainStatus(status, isRunning) \n {self.driveController()}
+C_4 -> C_4 : driveController() \n {} \n setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_4 -> C_4 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
 
-C_4 --> C_5 : setTrainStatus(false, false) \n {self.driveController()}
+C_4 --> C_5 : setTrainStatus(boolean status, boolean isRunning) \n {status == false && isRunning == false, self.driveController()}
 
 C_5 -> C_5 : driveController() \n {door.unlockDoor() after(networkDelayDoor) \n door.openDoor() after(reactionDelay + networkDelayDoor)}
-C_5 -> C_5 : setDoorStatus(close, lock) \n {self.driveController()}
-C_5 -> C_5 : setTrainStatus(status, isRunning) \n {self.driveController()}
+C_5 -> C_5 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_5 -> C_5 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
 
-C_5 --> C_6 : setDoorStatus(true, false) \n {driveController()}
+C_5 --> C_6 : setDoorStatus(boolean close, boolean lock) \n {close == true && lock == false, driveController()}
 
 C_6 -> C_6 : driveController() \n {door.openDoor() after(reactionDelay + networkDelayDoor)} \n 
-C_6 -> C_6 : setDoorStatus(close, lock) \n {self.driveController()}
-C_6 -> C_6 : setTrainStatus(status, isRunning) \n {self.driveController()}
+C_6 -> C_6 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_6 -> C_6 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
 
-C_6 --> C_7 : setDoorStatus(false, false) \n {driveController()}
+C_6 --> C_7 : setDoorStatus(boolean close, boolean lock) \n {close == false && lock == false, driveController()}
 
 C_7 -> C_7 : driveController() \n {}
-C_7 -> C_7 : setDoorStatus(close, lock) \n {self.driveController()}
-C_7 -> C_7 : setTrainStatus(status, isRunning) \n {self.driveController()}
+C_7 -> C_7 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_7 -> C_7 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
 
-C_7 --> C_1 : setTrainStatus(true, false) \n {driveController()}
+C_7 --> C_1 : setTrainStatus(boolean close, boolean lock) \n {close == true && lock == false, driveController()}
 
 }
 

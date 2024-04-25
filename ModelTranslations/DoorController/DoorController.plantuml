@@ -32,7 +32,6 @@ state D_3 : isDoorLocked
 
 D_1 -> D_1 : lockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 D_1 -> D_1 : unlockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
-D_1 -> D_1 : openDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 
 D_1 --> D_2 : closeDoor() \n {controller.setDoorStatus(isDoorClosed, isDoorLocked)  after(networkDelayDoor)}
 
@@ -43,7 +42,6 @@ D_2 -> D_2 :  unlockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 
 D_2 --> D_3 : lockDoor() \n {controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor)}
 
-D_3 -> D_3 : lockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 D_3 -> D_3 : closeDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 D_3 -> D_3 : openDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
 

@@ -1,0 +1,39 @@
+reactiveclass TrafficLight(5) {
+
+	knownrebecs {
+		TrafficLight t0ther; 
+	}
+	
+	statevars {
+	 	byte Color; 
+	}
+	
+	TrafficLight(byte myId) {
+		Color = 0; //Red
+		if(myId ==1)
+		{
+			self.RedtoGreen();
+		}
+	}
+ 	msgsrv RedtoGreen() {
+ 		Color = 1;
+ 		delay(2);
+ 		self.GreentoYellow();
+ 	}
+ 	
+	msgsrv GreentoYellow() {
+		Color = 2;
+		delay(2);
+		self.YellowtoRed();
+	}
+	msgsrv YellowtoRed(){
+		Color = 0;
+		delay(4);
+		t0ther.RedtoGreen();
+	}
+}
+		
+main {
+	TrafficLight traffic1(traffic2):(1);
+	TrafficLight traffic2(traffic1):(2);
+}

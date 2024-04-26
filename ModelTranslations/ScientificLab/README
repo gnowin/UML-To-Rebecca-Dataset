@@ -1,0 +1,10 @@
+You can change the delay value in the message server below in the Rebeca model, to see a case when the property is violated.
+
+msgsrv checkSciAck() {
+		if (!sciAck) {
+		// ZM change after(1) to e.g., after(5) for violation
+			rescue.go() after(1);
+			self.checkRescue() after(rescueDeadline);
+		}
+		sciAck = false;
+	}

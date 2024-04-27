@@ -1,0 +1,10 @@
+property { 
+	 define {
+ 		Commit = (node1.finalCommit == true && node2.finalCommit == true && node3.finalCommit == true );
+ 		
+ 	}
+	Assertion{
+//  		NOFinalCommit:!(Commit);  
+	}
+
+}

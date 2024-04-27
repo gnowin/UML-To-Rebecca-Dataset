@@ -1,0 +1,7 @@
+1) We have added a state variable, i.e., "finalCommit", and set it by the value of result in the applyResult message server;  We use this variable in the property file.
+i.e.,
+msgsrv applyResult(boolean result) {
+		finalCommit = result;
+}
+
+2) In the createTransaction message server, we have deleted three lines when the model wants to choose the second dispatcher, and added an "else" instead.

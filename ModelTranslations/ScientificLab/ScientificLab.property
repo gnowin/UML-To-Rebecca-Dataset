@@ -1,0 +1,9 @@
+property { 
+ 	define {
+ 		DeadScientist = (ctrl.sciDead == true);
+ 		
+ 	}
+	Assertion{
+  		HealthyEnvironment:!(DeadScientist);  
+	}
+}

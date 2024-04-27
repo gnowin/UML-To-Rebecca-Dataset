@@ -1,0 +1,113 @@
+//2 Phase Commit Protocol
+reactiveclass Node(10) {
+	knownrebecs {
+	    Node node1;
+	    Node node2;
+	}
+	statevars {
+	    byte srvNo;
+		boolean recievedResults;
+		boolean creationAbility;
+		int recievedResultsCounter;
+		int expectedResultsCounter;
+		boolean[2] cooperatorKnownRebecs;
+		// ZM
+		boolean finalCommit;
+		
+	}
+	
+	Node(boolean nodeCreationAbility) {
+		creationAbility = nodeCreationAbility;
+		self.createTransaction();
+	}
+	
+	msgsrv createTransaction() {
+
+		boolean startTrans;
+		startTrans = ?(true, false);
+		if (startTrans && creationAbility) {
+			boolean dispatcher = false;
+			boolean result;
+
+			int i;
+			for(i = 0; i < 2; i = i + 1)
+				cooperatorKnownRebecs[i] = false;
+
+			recievedResultsCounter = 0;
+			recievedResults = true;
+
+
+			expectedResultsCounter = 0;
+
+            srvNo = 1;
+			dispatcher = ?(true, false);
+			if (dispatcher) {
+				cooperatorKnownRebecs[0] = true;
+				expectedResultsCounter = expectedResultsCounter + 1;
+				node1.startGlobalTransaction();
+			// ZM 
+			//}
+			
+			//dispatcher = ?(true, false);
+			//if (dispatcher) 
+			}else{
+			
+				cooperatorKnownRebecs[1] = true;
+				expectedResultsCounter = expectedResultsCounter + 1;
+				node2.startGlobalTransaction();
+			}
+
+			expectedResultsCounter = expectedResultsCounter + 1;
+			result = ?(true, false);
+			self.cooperatorResponse(result);
+		}
+		else {
+			self.createTransaction();
+		}
+	}
+	
+	msgsrv startGlobalTransaction() {
+		boolean result;
+		result = ?(true, false);
+
+		if (sender == node1) {
+			node1.cooperatorResponse(result);
+		}
+		if (sender == node2) {
+			node2.cooperatorResponse(result);
+        }
+        
+	}
+
+	msgsrv cooperatorResponse(boolean result) {
+		recievedResultsCounter = recievedResultsCounter + 1;
+		if (!result)
+			recievedResults = false;
+
+		if (recievedResultsCounter == expectedResultsCounter) {
+            int i;
+			if (cooperatorKnownRebecs[0]) {
+				node1.applyResult(recievedResults);
+			}
+			if (cooperatorKnownRebecs[1]) {
+				node2.applyResult(recievedResults);
+			}
+
+			self.createTransaction();
+		}
+	}
+	
+
+	msgsrv applyResult(boolean result) {
+		// ZM
+		finalCommit = result;
+	}
+
+}
+
+
+main {
+	Node node1(node2, node3):(true);
+	Node node2(node3, node1):(false);
+	Node node3(node1, node2):(true);
+}

@@ -1,0 +1,61 @@
+@startuml
+
+hide empty description
+
+state Messenger{
+    [*] -> M_A : {self.sendMsg()}
+
+    state M_A : !sendBit
+    state M_A : hasSucceeded;
+
+    state M_B : sendBit
+    state M_B : hasSucceeded
+
+    state M_C : !sendBit
+    state M_C : !hasSucceeded;
+
+    state M_D : sendBit
+    state M_D : !hasSucceeded
+    
+    M_A -> M_A : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+
+    M_B -> M_B : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+
+    M_C -> M_C : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+    M_C -> M_C : sendMsg() \n {medium.pass(sendBit)}
+
+    M_D -> M_D : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+    M_D -> M_D : sendMsg() \n {medium.pass(sendBit)}
+
+    M_A --> M_B : sendMsg() \n {medium.pass(sendBit)}
+    M_B --> M_A : sendMsg() \n {medium.pass(sendBit)}
+
+    M_A --> M_C : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+    M_C --> M_A : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+
+
+    M_D --> M_B : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+    M_B --> M_D : recieve(boolean status) \n {hasSucceeded = status \n self.sendMsg()}
+}
+
+state Receiver{
+    state R_A : messageBit
+    state R_B : !messageBit
+
+    R_A -> R_B : recieveMsg(boolean msgBit) \n {messenger.recieve(true)}
+    R_B -> R_A : recieveMsg(boolean msgBit) \n {messenger.recieve(true)}
+}
+
+state Medium{
+    Med_A : passMessage
+    Med_B : !passMessage
+
+    Med_A -> Med_A : pass(boolean msgBit) \n { passMessage = ?(true,false) \n passMessage == true \n receiver.receiveMsg(msgBit) }
+    Med_A --> Med_B : pass(boolean msgBit) \n { passMessage = ?(true,false) \n messenger.recieve(false) }
+
+    Med_B -> Med_B : pass(boolean msgBit) \n { pass(boolean msgBit) \n { passMessage = ?(true,false) \n messenger.recieve(false) }
+    Med_B --> Med_A : pass(boolean msgBit) \n { passMessage = ?(true,false) \n passMessage == true \n receiver.receiveMsg(msgBit) }
+
+}
+
+@enduml

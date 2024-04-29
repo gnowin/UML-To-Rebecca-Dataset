@@ -29,7 +29,7 @@ reactiveclass Controller(4) {
 	Controller() {
 	sciDead = false;
 	sciAck = false;
-	sciDead = false;
+	sciRescued = false;
 	scientistDeadline = 5;
 	rescueDeadline = 4;
 	ctrlCheckPeriod = 15;

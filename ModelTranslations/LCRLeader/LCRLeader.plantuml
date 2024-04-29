@@ -2,16 +2,16 @@
 
 hide empty description
 
-state node{
-    state node_A : !isLeader
+state Node{
+    state N_A : !isLeader
 
-    state node_B : isLeader
+    state N_B : isLeader
 
-    [*] -> node_A : {self.send()}
-    node_A -> node_A : recieve(int n) \n {n > currentLeader \n currentLeader = n \n self.send()}
-    node_A -> node_A : send() \n {rightNode.recieve(currentLeader)}
-    node_A --> node_B : recieve(int n) \n {n == myNumber \n self.ImLeader()}
-    node_B -> node_B : self.ImLeader() \n {self.ImLeader()}
+    [*] -> N_A : {self.send()}
+    N_A -> N_A : recieve(int n) \n {n > currentLeader \n currentLeader = n \n self.send()}
+    N_A -> N_A : send() \n {rightNode.recieve(currentLeader)}
+    N_A --> N_B : recieve(int n) \n {n == myNumber \n self.ImLeader()}
+    N_B -> N_B : self.ImLeader() \n {self.ImLeader()}
 
 }
 

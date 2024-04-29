@@ -3,69 +3,69 @@
 hide empty description
 
 state BufferManager {
-    state bf_A : empty
-    state bf_A : !full
-    state bf_A : !producerWaiting
-    state bf_A : !consumerWaiting
+    state B_A : empty
+    state B_A : !full
+    state B_A : !producerWaiting
+    state B_A : !consumerWaiting
 
-    state bf_B : empty
-    state bf_B : !full
-    state bf_B : !producerWaiting
-    state bf_B : consumerWaiting
+    state B_B : empty
+    state B_B : !full
+    state B_B : !producerWaiting
+    state B_B : consumerWaiting
 
-    state bf_C : !empty
-    state bf_C : !full
-    state bf_C : !producerWaiting
-    state bf_C : !consumerWaiting
+    state B_C : !empty
+    state B_C : !full
+    state B_C : !producerWaiting
+    state B_C : !consumerWaiting
 
-    state bf_D : !empty
-    state bf_D : full
-    state bf_D : !producerWaiting
-    state bf_D : !consumerWaiting
+    state B_D : !empty
+    state B_D : full
+    state B_D : !producerWaiting
+    state B_D : !consumerWaiting
 
-    state bf_E : !empty
-    state bf_E : full
-    state bf_E : producerWaiting
-    state bf_E : !consumerWaiting
+    state B_E : !empty
+    state B_E : full
+    state B_E : producerWaiting
+    state B_E : !consumerWaiting
 
     
-    [*] -> bf_A
+    [*] -> B_A
 
-    bf_A -> bf_A : giveMeNextProduce() \n {producer.produce(nextProduce)}
+    B_A -> B_A : giveMeNextProduce() \n {producer.produce(nextProduce)}
 
-    bf_A -up-> bf_B : giveMeNextConsume() \n {}
-    bf_B -down-> bf_A : ackProduce() \n {consumer.consume(nextConsume)}
+    B_A --> B_B : giveMeNextConsume() \n {}
+    B_B --> B_A : ackProduce() \n {consumer.consume(nextConsume)}
    
-    bf_B -> bf_B : giveMeNextProduce() \n {producer.produce(nextProduce)}
+    B_B -> B_B : giveMeNextProduce() \n {producer.produce(nextProduce)}
 
-    bf_A --> bf_C : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength}
-    bf_C -left-> bf_A : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce}
+    B_A --> B_C : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength}
+    B_C --> B_A : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce}
 
-    bf_C -> bf_C : giveMeNextProduce() \n {producer.produce(nextProduce)}
-    bf_C -> bf_C : giveMeNextConsume() \n {consumer.consume(nextConsume)}
+    B_C -> B_C : giveMeNextProduce() \n {producer.produce(nextProduce)}
+    B_C -> B_C : giveMeNextConsume() \n {consumer.consume(nextConsume)}
 
-    bf_C --> bf_D : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume}
-    bf_D --> bf_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
+    B_C --> B_D : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume}
+    B_D --> B_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
 
-    bf_D --> bf_E : giveMeNextProduce() \n {}
-    bf_E --> bf_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
+    B_D --> B_E : giveMeNextProduce() \n {}
+    B_E --> B_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
 }
 
 state Producer{
 
-    state p_A
+    state P_A
 
-    [*] -> p_A : {self.beginProduce()}
-    p_A -> p_A : produce(int bufNum) \n {buffer.ackProduce() \n self.beginProduce()}
-    p_A -> p_A : beginProduce() \n {buffer.giveMeNextProduce()}
+    [*] -> P_A : {self.beginProduce()}
+    P_A -> P_A : produce(int bufNum) \n {buffer.ackProduce() \n self.beginProduce()}
+    P_A -> P_A : beginProduce() \n {buffer.giveMeNextProduce()}
 }
 
 state Consumer{
-    state c_A
+    state C_A
 
-    [*] -> c_A : {self.beginConsume()}
-    c_A -> c_A : consume(int bufNum) \n {buffer.ackConsume() \n self.beginConsume()}
-    c_A -> c_A : beginConsume() \n {buffer.giveMeNextConsume()}
+    [*] -> C_A : {self.beginConsume()}
+    C_A -> C_A : consume(int bufNum) \n {buffer.ackConsume() \n self.beginConsume()}
+    C_A -> C_A : beginConsume() \n {buffer.giveMeNextConsume()}
 }
 
 @enduml

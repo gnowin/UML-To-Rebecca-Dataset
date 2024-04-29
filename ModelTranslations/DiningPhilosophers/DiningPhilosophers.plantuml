@@ -4,75 +4,75 @@ hide empty description
 
 state Philosopher{
 
-State p_A : !eat
-State p_A : !fL
-State p_A : !fR
+State P_A : !eat
+State P_A : !fL
+State P_A : !fR
 
-State p_B : !eat
-State p_B : fL
-State p_B : !fR
+State P_B : !eat
+State P_B : fL
+State P_B : !fR
 
-State p_C : !eat
-State p_C : fL
-State p_C : fR
+State P_C : !eat
+State P_C : fL
+State P_C : fR
 
-State p_D : eat
-State p_D : fL
-State p_D : fR
+State P_D : eat
+State P_D : fL
+State P_D : fR
 
-[*] -> p_A
+[*] -> P_A
 
-p_A -> p_B : permit() {sender == forkL \n forkR.request}
+P_A -> P_B : permit() {sender == forkL \n forkR.request}
 
-p_B -> p_C : permit() {self.eat}
+P_B -> P_C : permit() {self.eat}
 
-p_C -> p_D : eat() {self.leave}
+P_C -> P_D : eat() {self.leave}
 
-p_D -> p_A : leave() {forkL.release() \n forkR.release() \n self.arrive()}
+P_D -> P_A : leave() {forkL.release() \n forkR.release() \n self.arrive()}
 
 }
 
 state Fork{
 
-State F_ : !LA
-State F_ : !RA
-State F_ : !LR
-State F_ : !RR
-
-State F_A : LA
+State F_A : !LA
 State F_A : !RA
-State F_A : LR
+State F_A : !LR
 State F_A : !RR
 
 State F_B : LA
 State F_B : !RA
-
 State F_B : LR
-State F_B : RR
+State F_B : !RR
 
-State F_C : !LA
-State F_C : RA
+State F_C : LA
+State F_C : !RA
+
 State F_C : LR
 State F_C : RR
 
 State F_D : !LA
 State F_D : RA
-State F_D : !LR
+State F_D : LR
 State F_D : RR
 
-[*] -> F_
+State F_E : !LA
+State F_E : RA
+State F_E : !LR
+State F_E : RR
 
-F_ --> F_A : request() \n {sender == philL \n philL.permit()}
+[*] -> F_A
 
-F_ --> F_D : request() \n {philR.permit()}
+F_A --> F_B : request() \n {sender == philL \n philL.permit()}
 
-F_A --> F_B : request() \n {philR.permit()}
+F_A --> F_E : request() \n {philR.permit()}
 
-F_B --> F_D : release() \n {sender == philL && lAssign \n philR.permit()}
+F_B --> F_C : request() \n {philR.permit()}
 
-F_D --> F_C : request() \n {philL.permit()}
+F_C --> F_E : release() \n {sender == philL && lAssign \n philR.permit()}
 
-F_C --> F_A : release() \n {sender == philR && rAssign \n philL.permit()}
+F_E --> F_D : request() \n {philL.permit()}
+
+F_D --> F_B : release() \n {sender == philR && rAssign \n philL.permit()}
 
 }
 

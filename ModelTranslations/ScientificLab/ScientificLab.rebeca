@@ -27,6 +27,9 @@ reactiveclass Controller(4) {
 	}
 	
 	Controller() {
+	sciDead = false;
+	sciAck = false;
+	sciDead = false;
 	scientistDeadline = 5;
 	rescueDeadline = 4;
 	ctrlCheckPeriod = 15;
@@ -57,6 +60,7 @@ reactiveclass Controller(4) {
 	}
 	msgsrv checkSciAck() {
 		if (!sciAck) {
+			sciRescued = false;
 			rescue.go() after(1);
 			self.checkRescue() after(rescueDeadline);
 		}

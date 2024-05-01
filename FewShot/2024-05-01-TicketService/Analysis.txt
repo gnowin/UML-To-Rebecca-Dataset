@@ -1,0 +1,29 @@
+Notes:
+For this few shot, we turned of a setting in ChatGPT-4 that should prevent it from learning from what we give as input.
+In this way, the experiment should be able to be reproduced. However, ChatGPT-4 is not deterministic so the result may be different.
+
+Code was satisfied when the errors were fixed.
+Number of Reached States: 10
+Number of Reached translations: 12
+
+When adding one more costumer:
+Number of Reached States: 699
+Number of Reached translations: 827
+
+Correct:
+All message servers, statevariables and knownrebecs are present.
+Reactiveclass Customer is correct and almost identical to the original code.
+Reactiveclass Agent is correct and almost identical to the original code.
+
+
+Wrong:
+Code did not run due to 2 errors.
+    1. In main, parantases for TicketService, TicketService ticketService: (); istead of TicketService ticketService(): ();
+    2. In the reactiveclass TicketService, parantases and questionmark,  delay(delayMin, delayMax); istead of delay(?(delayMin, delayMax));
+
+Created one costumer instead of two
+Empty constructor in TicketService
+Created 2 env variables: delayMin and DelayMax which was used for the delay in the reactiveclass TicketService.
+
+There are no deadline in the reactiveclass Agent.
+

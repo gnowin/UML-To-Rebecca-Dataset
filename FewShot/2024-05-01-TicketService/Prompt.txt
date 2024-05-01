@@ -1,0 +1,978 @@
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+state Philosopher{
+
+State P_A : !eat
+State P_A : !fL
+State P_A : !fR
+
+State P_B : !eat
+State P_B : fL
+State P_B : !fR
+
+State P_C : !eat
+State P_C : fL
+State P_C : fR
+
+State P_D : eat
+State P_D : fL
+State P_D : fR
+
+[*] -> P_A
+
+P_A -> P_B : permit() {sender == forkL \n forkR.request}
+
+P_B -> P_C : permit() {self.eat}
+
+P_C -> P_D : eat() {self.leave}
+
+P_D -> P_A : leave() {forkL.release() \n forkR.release() \n self.arrive()}
+
+}
+
+state Fork{
+
+State F_A : !LA
+State F_A : !RA
+State F_A : !LR
+State F_A : !RR
+
+State F_B : LA
+State F_B : !RA
+State F_B : LR
+State F_B : !RR
+
+State F_C : LA
+State F_C : !RA
+
+State F_C : LR
+State F_C : RR
+
+State F_D : !LA
+State F_D : RA
+State F_D : LR
+State F_D : RR
+
+State F_E : !LA
+State F_E : RA
+State F_E : !LR
+State F_E : RR
+
+[*] -> F_A
+
+F_A --> F_B : request() \n {sender == philL \n philL.permit()}
+
+F_A --> F_E : request() \n {philR.permit()}
+
+F_B --> F_C : request() \n {philR.permit()}
+
+F_C --> F_E : release() \n {sender == philL && lAssign \n philR.permit()}
+
+F_E --> F_D : request() \n {philL.permit()}
+
+F_D --> F_B : release() \n {sender == philR && rAssign \n philL.permit()}
+
+}
+
+@enduml 
+
+Output:
+
+
+reactiveclass Philosopher(3)
+{
+	knownrebecs
+	{
+		Fork forkL;
+		Fork forkR;
+	}
+	statevars
+	{
+		boolean eating;
+		boolean fL;
+		boolean fR;
+	}
+	Philosopher()
+	{
+		fL = false;
+		fR = false;
+		eating = false;
+		self.arrive();
+	}
+
+	msgsrv arrive()
+	{
+		forkL.request();
+	}
+
+	msgsrv permit()
+	{
+		if (sender == forkL) {
+			if (!fL) {
+				fL = true;
+				forkR.request();
+			}
+		}
+		else {
+			if (fL && !(fR)) {
+				fR = true;
+				self.eat();
+			}
+		}
+	}
+
+	msgsrv eat()
+	{
+		eating = true;
+		self.leave();
+	}
+
+	msgsrv leave()
+	{
+		fL = false;
+		fR = false;
+		eating = false;
+		forkL.release();
+		forkR.release();
+		self.arrive();
+	}
+}
+
+reactiveclass Fork(3)
+{
+	knownrebecs
+	{
+		Philosopher philL;
+		Philosopher philR;
+	}
+	statevars
+	{
+		boolean lAssign;	
+		boolean rAssign;	
+		boolean leftReq;
+		boolean rightReq;
+	}
+	Fork()
+	{ 
+		lAssign = false;
+		rAssign = false;
+		leftReq = false;
+		rightReq = false;
+	}
+
+	msgsrv request()
+	{
+		if (sender == philL) {
+			if (!leftReq) {
+				leftReq = true;
+				if (!rAssign) {
+					lAssign = true;
+					philL.permit();
+				}
+			} 
+		}
+		else {
+			if (!rightReq) {
+				rightReq = true;
+				if (!lAssign) {
+					rAssign = true;
+					philR.permit();
+				}
+			}
+		}
+	}
+	msgsrv release()
+	{
+		if (sender == philL && lAssign){
+			leftReq = false;
+			lAssign = false;
+			if (rightReq) {
+				rAssign=true;
+				philR.permit();
+			}
+		}
+		if (sender == philR && rAssign){
+			rAssign = false;
+			rightReq = false;
+			if (leftReq) {
+				lAssign=true;
+				philL.permit();
+			}
+		}
+	}
+}
+
+main
+{
+       Philosopher phil0(fork0, fork2):();
+       Philosopher phil1(fork0, fork1):();
+       Philosopher phil2(fork1, fork2):();
+
+       Fork fork0(phil0, phil1):();
+       Fork fork1(phil1, phil2):();
+       Fork fork2(phil2, phil0):();
+}
+
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+hide empty description
+
+state Train{
+state T_1 : !status
+state T_1 : !isRun
+
+state T_2 : status
+state T_2 : !isRun
+
+state T_3 : status
+state T_3 : isRun
+
+
+[*] -> T_2 : {self.leaveStation()}
+T_1 -> T_2 : LeaveStation() \n {controller.setTrainStatus(status, isRun) after(networkDelayTrain)}
+T_2 -> T_3 : running() \n {controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.approachStation() after(runningTime)}
+T_3 -> T_1 : approachStation() \n {controller.setTrainStatus(status, isRun) after(networkDelayTrain) \n self.leaveStation() after(atStationTime)}
+}
+
+state Door{
+state D_1 : !isDoorClosed
+state D_1 : !isDoorLocked
+
+state D_2 : isDoorClosed
+state D_2 : !isDoorLocked
+
+state D_3 : isDoorClosed
+state D_3 : isDoorLocked
+
+[*] -> D_1
+
+D_1 -> D_1 : lockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
+D_1 -> D_1 : unlockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
+
+D_1 --> D_2 : closeDoor() \n {controller.setDoorStatus(isDoorClosed, isDoorLocked)  after(networkDelayDoor)}
+
+D_2 --> D_1 : openDoor() \n {controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor)}
+
+D_2 -> D_2 : closeDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
+D_2 -> D_2 :  unlockDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
+
+D_2 --> D_3 : lockDoor() \n {controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor)}
+
+D_3 -> D_3 : closeDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
+D_3 -> D_3 : openDoor() \n {controller.setDoorStatus after(networkDelayDoor)}
+
+D_3 --> D_2 : unlockDoor() \n {controller.setDoorStatus(isDoorLocked, isDoorLocked) after(networkDelayDoor)}
+}
+
+state Controller{
+
+state C_1 : !isClosed
+state C_1 : !isLocked
+state C_1 : trainStatus
+state C_1 : !commandToMove
+
+state C_2 : isClosed
+state C_2 : !isLocked
+state C_2 : trainStatus
+state C_2 : !commandToMove
+
+state C_3 : isClosed
+state C_3 : isLocked
+state C_3 : trainStatus
+state C_3 : !commandToMove
+
+state C_4 : isClosed
+state C_4 : isLocked
+state C_4 : trainStatus
+state C_4 : commandToMove
+
+state C_5 : isClosed
+state C_5 : isLocked
+state C_5 : !trainStatus
+state C_5 : !commandToMove
+
+state C_6 : isClosed
+state C_6 : !isLocked
+state C_6 : !trainStatus
+state C_6 : !commandToMove
+
+state C_7 : !isClosed
+state C_7 : !isLocked
+state C_7 : !trainStatus
+state C_7 : !commandToMove
+
+
+[*] -> C_1
+
+C_1 -> C_1 : driveController() \n {door.closeDoor() after(networkDelayDoor) \n door.lockDoor() after(reactionDelay + networkDelayDoor)}
+C_1 -> C_1 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_1 -> C_1 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
+
+C_1 --> C_2 : setDoorStatus(boolean close, boolean lock) \n {close == true && lock == false, self.driveController()}
+
+C_2 -> C_2 : driveController() \n {door.lockDoor() after(networkDelayDoor)}
+C_2 -> C_2 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_2 -> C_2 : setTrainStatus(boolean status, boolean isRunning) \n (self.driveController()}
+
+C_2 --> C_3 : setDoorStatus(boolean close, boolean lock) \n {close == true && lock == true, self.driveController()}
+
+C_3 -> C_3 : driveController() \n {train.running() after(networkDelayTrain}
+C_3 -> C_3 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_3 -> C_3 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
+
+C_3 --> C_4 : setTrainStatus(boolean status, boolean isRunning) \n {status == true && isRunning == true, self.driveController()}
+
+C_4 -> C_4 : driveController() \n {} \n setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_4 -> C_4 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
+
+C_4 --> C_5 : setTrainStatus(boolean status, boolean isRunning) \n {status == false && isRunning == false, self.driveController()}
+
+C_5 -> C_5 : driveController() \n {door.unlockDoor() after(networkDelayDoor) \n door.openDoor() after(reactionDelay + networkDelayDoor)}
+C_5 -> C_5 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_5 -> C_5 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
+
+C_5 --> C_6 : setDoorStatus(boolean close, boolean lock) \n {close == true && lock == false, driveController()}
+
+C_6 -> C_6 : driveController() \n {door.openDoor() after(reactionDelay + networkDelayDoor)} \n 
+C_6 -> C_6 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_6 -> C_6 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
+
+C_6 --> C_7 : setDoorStatus(boolean close, boolean lock) \n {close == false && lock == false, driveController()}
+
+C_7 -> C_7 : driveController() \n {}
+C_7 -> C_7 : setDoorStatus(boolean close, boolean lock) \n {self.driveController()}
+C_7 -> C_7 : setTrainStatus(boolean status, boolean isRunning) \n {self.driveController()}
+
+C_7 --> C_1 : setTrainStatus(boolean close, boolean lock) \n {close == true && lock == false, driveController()}
+
+}
+
+state Passenger{
+state P : P
+
+[*] -> P : {self.passengerOpenDoor() after(passengerPeriod)}
+P -> P : passengerOpenDoor() \n {door.openDoor() \n self.passengerOpenDoor() after(passengerPeriod)}
+}
+@enduml
+
+Output:
+env byte networkDelayDoor = 3;
+env byte networkDelayTrain = 0;
+env byte reactionDelay = 1;
+env byte passengerPeriod = 5;
+env short runningTime = 233;
+env short atStationTime = 50;
+
+reactiveclass Controller(23){
+	knownrebecs{
+		Door door; 
+		Train train;
+	} 
+	statevars{
+		boolean isClosed;
+		boolean isLocked; 
+		boolean trainStatus; 
+		boolean commandToMove;
+		} 
+	Controller(){
+		trainStatus = true;
+		commandToMove = false;
+		isClosed = false;
+		isLocked = false; 
+		}
+		 
+	msgsrv setDoorStatus(boolean close, boolean lock) {
+	     isClosed = close;
+	     isLocked = lock;
+	     self.driveController();
+	}  
+	msgsrv setTrainStatus(boolean status, boolean isRunning){
+		trainStatus = status; 
+		commandToMove = isRunning;
+		self.driveController(); 
+	}
+		 
+	msgsrv driveController(){ 
+		if(trainStatus){ //leave the station
+			if(!isClosed || !isLocked) {
+				if(!isClosed)	
+					door.closeDoor() after(networkDelayDoor);
+				if(!isLocked)
+					door.lockDoor() after(reactionDelay  + networkDelayDoor);
+			}         
+			if(isClosed && isLocked && !commandToMove)
+				train.running() after(networkDelayTrain);
+		}
+		else if(!trainStatus){ // arrive to the station
+			if(isClosed || isLocked) {
+			   if(isLocked)
+			   	door.unlockDoor() after(networkDelayDoor);
+			if(isClosed)
+				door.openDoor()after(reactionDelay  + networkDelayDoor);
+			}  
+		}
+	}
+}
+
+
+reactiveclass Train(5){
+	knownrebecs{
+	Controller controller;
+	}	
+	statevars{
+		boolean status;
+		boolean isRun;
+		}
+	Train(){
+		status = true;
+		isRun = false;
+		self.leaveStation(); 
+	}
+	msgsrv leaveStation(){
+		status = true;
+		isRun = false;
+		controller.setTrainStatus(status, isRun)
+		after(networkDelayTrain); 
+		
+		}
+	msgsrv running(){
+		isRun = true;
+		controller.setTrainStatus(status, isRun)
+		after(networkDelayTrain);
+		self.approachStation() after(runningTime);
+	}
+	msgsrv approachStation(){
+		status = false;
+		isRun = false;
+		controller.setTrainStatus(status, isRun) after(networkDelayTrain);
+		self.leaveStation() after(atStationTime);
+	}
+}
+
+reactiveclass Door(15){
+	knownrebecs{
+	Controller controller;
+	}
+	statevars{
+		boolean isDoorClosed;
+		boolean isDoorLocked;
+		}
+	Door(){
+	isDoorClosed = false;
+	isDoorLocked = false;
+	}
+	msgsrv closeDoor(){
+		isDoorClosed = true;
+		controller.setDoorStatus(isDoorClosed, isDoorLocked)
+		after(networkDelayDoor);
+	}
+	msgsrv lockDoor(){
+		if (isDoorClosed){
+			isDoorLocked = true;
+		}
+		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
+	}
+	msgsrv unlockDoor(){
+		isDoorLocked = false;
+		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
+	}
+	msgsrv openDoor(){
+		if(!isDoorLocked){
+			isDoorClosed = false;
+		}
+		controller.setDoorStatus(isDoorClosed, isDoorLocked) after(networkDelayDoor);
+	}
+}
+
+reactiveclass Passenger(5){
+	knownrebecs{Door door;} 
+	Passenger(){self.passengerOpenDoor() after(passengerPeriod);
+	}
+	msgsrv passengerOpenDoor(){door.openDoor();
+		self.passengerOpenDoor() after(passengerPeriod);
+	}
+}
+main {
+	Controller controller(door, train):();
+	Door door(controller):();       
+	Train train(controller):();
+	Passenger passenger(door):();
+}
+
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+state BufferManager {
+    state B_A : empty
+    state B_A : !full
+    state B_A : !producerWaiting
+    state B_A : !consumerWaiting
+
+    state B_B : empty
+    state B_B : !full
+    state B_B : !producerWaiting
+    state B_B : consumerWaiting
+
+    state B_C : !empty
+    state B_C : !full
+    state B_C : !producerWaiting
+    state B_C : !consumerWaiting
+
+    state B_D : !empty
+    state B_D : full
+    state B_D : !producerWaiting
+    state B_D : !consumerWaiting
+
+    state B_E : !empty
+    state B_E : full
+    state B_E : producerWaiting
+    state B_E : !consumerWaiting
+
+    
+    [*] -> B_A
+
+    B_A -> B_A : giveMeNextProduce() \n {producer.produce(nextProduce)}
+
+    B_A --> B_B : giveMeNextConsume() \n {}
+    B_B --> B_A : ackProduce() \n {consumer.consume(nextConsume)}
+   
+    B_B -> B_B : giveMeNextProduce() \n {producer.produce(nextProduce)}
+
+    B_A --> B_C : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength}
+    B_C --> B_A : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n nextConsume == nextProduce}
+
+    B_C -> B_C : giveMeNextProduce() \n {producer.produce(nextProduce)}
+    B_C -> B_C : giveMeNextConsume() \n {consumer.consume(nextConsume)}
+
+    B_C --> B_D : ackProduce() \n {nextProduce = (nextProduce + 1) % bufferlength \n nextProduce == nextConsume}
+    B_D --> B_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
+
+    B_D --> B_E : giveMeNextProduce() \n {}
+    B_E --> B_C : ackConsume() \n {nextConsume = (nextConsume + 1) % bufferlenght \n producer.produce(nextProduce)}
+}
+
+state Producer{
+
+    state P_A
+
+    [*] -> P_A : {self.beginProduce()}
+    P_A -> P_A : produce(int bufNum) \n {buffer.ackProduce() \n self.beginProduce()}
+    P_A -> P_A : beginProduce() \n {buffer.giveMeNextProduce()}
+}
+
+state Consumer{
+    state C_A
+
+    [*] -> C_A : {self.beginConsume()}
+    C_A -> C_A : consume(int bufNum) \n {buffer.ackConsume() \n self.beginConsume()}
+    C_A -> C_A : beginConsume() \n {buffer.giveMeNextConsume()}
+}
+
+@enduml
+
+Output:
+reactiveclass BufferManager(4) {
+	knownrebecs {
+		Producer producer;
+		Consumer consumer;
+	}
+
+	statevars {
+		boolean empty;
+		boolean full;
+		boolean producerWaiting;
+		boolean consumerWaiting;
+		int bufferlenght;
+		int nextProduce;
+		int nextConsume;		
+	}
+
+	BufferManager() {
+		bufferlenght = 2;
+		empty = true;
+		full = false;
+		producerWaiting = false;
+		consumerWaiting = false;
+		nextProduce = 0;
+		nextConsume = 0;
+	}
+
+	msgsrv giveMeNextProduce() {
+		if (!full)	{
+			producer.produce(nextProduce);
+		} 
+		else {
+			producerWaiting = true;
+		}
+	}
+
+	msgsrv giveMeNextConsume() {
+		if (!empty) {
+			consumer.consume(nextConsume);
+		} 
+     	else {
+			consumerWaiting = true;
+		}
+	}	
+
+	msgsrv ackProduce() {
+		nextProduce = (nextProduce + 1) %
+                    bufferlenght;
+		if (nextProduce == nextConsume) {
+			full = true;
+		}
+		empty = false;
+		if (consumerWaiting) {
+			consumer.consume(nextConsume);
+			consumerWaiting = false;
+		}
+	}
+
+	msgsrv ackConsume() {
+		nextConsume = (nextConsume + 1) %
+                    bufferlenght;
+		if (nextConsume == nextProduce) {
+			empty = true;
+		}
+		full = false;
+		if (producerWaiting) {
+			producer.produce(nextProduce);
+			producerWaiting = false;
+		}
+	}
+}
+
+reactiveclass Producer(2) {
+	knownrebecs {
+		BufferManager buffer;
+	}
+
+	statevars {
+	}
+
+	Producer() {
+		self.beginProduce();
+	}
+	
+	msgsrv produce(int bufNum) {
+		buffer.ackProduce();
+		self.beginProduce();
+	}
+
+	msgsrv beginProduce() {
+		buffer.giveMeNextProduce();
+	}
+}
+
+reactiveclass Consumer(2) {
+	knownrebecs {
+		BufferManager buffer;		
+	}
+
+	statevars {
+	}
+
+	Consumer() {
+		self.beginConsume();
+	}
+
+	msgsrv consume(int bufNum) {
+		buffer.ackConsume();
+		self.beginConsume();	
+	}
+	
+	msgsrv beginConsume() {
+		buffer.giveMeNextConsume();
+	}
+
+}
+
+main { 
+	BufferManager buffer(producer, consumer):();
+	Producer producer(buffer):();
+	Consumer consumer(buffer):();
+}
+
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+state Node{
+    state N_A : !isLeader
+
+    state N_B : isLeader
+
+    [*] -> N_A : {self.send()}
+    N_A -> N_A : recieve(int n) \n {n > currentLeader \n currentLeader = n \n self.send()}
+    N_A -> N_A : send() \n {rightNode.recieve(currentLeader)}
+    N_A --> N_B : recieve(int n) \n {n == myNumber \n self.ImLeader()}
+    N_B -> N_B : self.ImLeader() \n {self.ImLeader()}
+
+}
+
+@enduml
+
+Output:
+	reactiveclass Node(8){
+	knownrebecs {
+		Node rightNode;
+	}
+	statevars {
+		boolean isLeader;
+		int myNumber;
+		int currentLeader;		
+	}
+	Node(byte n) {
+		myNumber = n;
+		currentLeader = n;
+		isLeader = false;
+		self.send();
+	}
+	
+	msgsrv ImLeader() {
+		self.ImLeader();
+	}
+	msgsrv send() {
+		rightNode.receive(currentLeader);
+	}
+	msgsrv receive(int n) {
+		if (n == myNumber) {
+			isLeader = true;
+			self.ImLeader();
+		}
+		else {
+			if (n > currentLeader) {
+				currentLeader = n;
+				self.send();
+			}
+		}
+	}
+}
+
+main {
+   Node node0(node2):(4); 
+   Node node1(node0):(20); 
+   Node node2(node1):(10); 
+} 
+
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+
+state Train{
+
+T_A : !onTheBridge
+
+T_B : onTheBridge
+
+[*] -> T_A : {self.Passed()}
+
+T_A -> T_A : ReachBridge() \n {controller.Arrive()}
+T_A --> T_B : YouMayPass() \n {self.Passed()}
+
+T_B --> T_A : Passed() \n {controller.Leave() \n self.ReachBridge()}
+
+}
+
+state Controller{
+
+State C_A : !isOnBridge1
+State C_A : !isOnBridge2
+State C_A : !isWaiting1
+State C_A : !isWaiting2
+
+State C_B : isOnBridge1
+State C_B : !isOnBridge2
+State C_B : !isWaiting1
+State C_B : !isWaiting2
+
+State C_C : !isOnBridge1
+State C_C : isOnBridge2
+State C_C : !isWaiting1
+State C_C : !isWaiting2
+State C_D : isOnBridge1
+State C_D : !isOnBridge2
+State C_D : !isWaiting1
+State C_D : isWaiting2
+State C_E : !isOnBridge1
+State C_E : isOnBridge2
+State C_E : isWaiting1
+State C_E : !isWaiting2
+
+[*] -> C_A
+
+C_A --> C_B : Arrive() \n {sender == (Train t1) \n (Train t1).YouMayPass()}
+
+C_A --> C_C : Arrive() \n {sender != (Train t1) \n (Train t2).YouMayPass()}
+
+C_B --> C_D : Arrive() \n {sender != (Train t1) \n isWaiting2 = true}
+
+C_C --> C_E : Arrive() \n {sender == (Train t1) \n isWaiting1 = true}
+
+C_D --> C_C : Leave() \n {sender == (Train t1) \n (Train t2).YouMayPass()}
+
+C_E --> C_B : Leave \n {sender != (Train t1) \n (Train t1).YouMayPass()}
+
+}
+
+@enduml 
+
+Output:
+reactiveclass BridgeController(5) {
+	knownrebecs {
+		Train t1;
+		Train t2;
+	}
+
+	statevars {
+		boolean isWaiting1;
+		boolean isWaiting2;
+		boolean isOnBridge1;
+		boolean isOnBridge2;
+	}
+
+	BridgeController() {
+		isOnBridge1 = false;
+		isOnBridge2 = false;
+		isWaiting1 = false;
+		isWaiting2 = false;
+	}
+	
+	msgsrv Arrive() {
+		if (sender == t1){
+			if (isOnBridge2 == false) {
+				isOnBridge1 = true;
+				t1.YouMayPass();
+			}
+			else {
+				isWaiting1 = true;
+			}
+		}
+		else {
+			if (isOnBridge1 == false){
+				isOnBridge2 = true;
+				t2.YouMayPass();
+			}
+			else{
+				isWaiting2 = true;
+			}
+		}
+	}
+	
+	msgsrv Leave() {
+		if (sender == t1) {
+			isOnBridge1 = false;
+			if (isWaiting2){
+				isOnBridge2 = true;
+				t2.YouMayPass();
+				isWaiting2 = false;
+			}
+		} else {
+			isOnBridge2 = false;
+			if (isWaiting1) {
+				isOnBridge1 = true;
+				t1.YouMayPass();
+				isWaiting1 = false;
+			}
+		}
+	}
+}
+
+reactiveclass Train(3) {
+	knownrebecs {
+		BridgeController controller;
+	}
+
+	statevars {
+		boolean onTheBridge;
+	}
+
+	Train() {
+		onTheBridge = false;
+		self.Passed();
+	}
+
+	msgsrv YouMayPass() {
+		onTheBridge = true;
+		self.Passed();
+	}
+	
+	msgsrv Passed() {
+		onTheBridge = false;
+		controller.Leave();
+		self.ReachBridge();
+	}
+
+	msgsrv ReachBridge() {
+		controller.Arrive();
+	}
+}
+
+main {
+	Train train1(theController):();
+	Train train2(theController):();
+	BridgeController theController(train1, train2):();
+}
+
+Could you translate this PlantUML diagram to Rebeca (Reactive Objects Language) code?
+
+Input:
+@startuml
+
+hide empty description
+
+state Customer{
+
+state C
+
+[*] -> C : {id = myID \n self.try()}
+
+C -> C :try() \n {agent.requestTicket()}
+
+C -> C : ticketIssued() \n {self.try() after(30)}
+
+}
+
+state Agent{
+
+state A
+
+[*] -> A
+
+A -> A : requestTicket() \n {ticketService.requestTicket((Customer)sender)}
+
+A -> A : ticketIssued(Customer customer) \n {customer.ticketIssued()}
+
+}
+
+state TicketService{
+
+state T
+
+[*] -> T
+
+T -> T : requestTicket(Customer customer) \n {delay(?(2, 3)) \n ((Agent)sender).ticketIssued(customer)}
+
+}
+
+@enduml 
+
+Output: 

@@ -1,0 +1,58 @@
+Here is the translation of the specified PlantUML diagram to Rebeca (Reactive Objects Language) code for the system involving a Customer, Agent, and Ticket Service:
+
+env byte delayMin = 2;
+env byte delayMax = 3;
+
+reactiveclass Customer(3) {
+    knownrebecs {
+        Agent agent;
+    }
+    statevars {
+        int myID;
+    }
+
+    Customer(int id) {
+        myID = id;
+        self.tryTicket();
+    }
+
+    msgsrv tryTicket() {
+        agent.requestTicket();
+    }
+
+    msgsrv ticketIssued() {
+        self.tryTicket() after(30);
+    }
+}
+
+reactiveclass Agent(3) {
+    knownrebecs {
+        TicketService ticketService;
+    }
+
+    Agent() {}
+
+    msgsrv requestTicket() {
+        ticketService.requestTicket((Customer)sender);
+    }
+
+    msgsrv ticketIssued(Customer customer) {
+        customer.ticketIssued();
+    }
+}
+
+reactiveclass TicketService(3) {
+    TicketService() {}
+
+    msgsrv requestTicket(Customer customer) {
+        delay(delayMin, delayMax);
+        ((Agent)sender).ticketIssued(customer);
+    }
+}
+
+main {
+    Customer customer(agent): (1234);
+    Agent agent(ticketService): ();
+    TicketService ticketService: ();
+}
+This Rebeca code defines a system where a Customer repeatedly tries to get a ticket via an Agent, who interacts with a TicketService. The TicketService processes the request and, after a simulated delay, notifies the Agent, who then informs the Customer that their ticket has been issued. The Customer then waits for 30 time units before trying again, modeling the customer's continuous attempts to secure a ticket.

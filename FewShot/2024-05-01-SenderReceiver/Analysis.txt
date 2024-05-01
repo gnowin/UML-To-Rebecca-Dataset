@@ -1,0 +1,15 @@
+Notes:
+For this few shot, we turned of a setting in ChatGPT-4 that should prevent it from learning from what we give as input.
+In this way, the experiment should be able to be reproduced. However, ChatGPT-4 is not deterministic so the result may be different.
+
+Correct:
+The logic is working except that the sender does not send the same bit if it fails.
+
+Wrong:
+It creates an env variable that does not exist in the original code. It seems to be there as extra functionality, to say if the medium should always be reliable or not.
+
+?(true, false), random true or false, is not written correctly. This is probably because there are no examples of this in the training data, and ChatGPT did not learn to not use the syntax that was provided in the PlantUML.
+
+medium.setKnownRebecs(receiver, messenger), this way of settings know rebecs does not exist. It should be directly into the constructor syntax, like it did with the other rebecs. It hallucinated this even though there is nothing in the training data that suggests this is a way you can do it.
+
+Even though it is present in the PlantUML that the sendBit variable should only alternate when getting message to sendMsg, in the generated code it does this instead in the msgsrv receive, which is not how it should be.

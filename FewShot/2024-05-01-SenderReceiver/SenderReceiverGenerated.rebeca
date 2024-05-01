@@ -1,0 +1,76 @@
+env boolean networkReliability = true;
+
+reactiveclass Messenger(5) {
+    knownrebecs {
+        Medium medium;
+    }
+    statevars {
+        boolean sendBit;
+        boolean hasSucceeded;
+    }
+
+    Messenger() {
+        sendBit = false;
+        hasSucceeded = false;
+        self.sendMsg();
+    }
+
+    msgsrv sendMsg() {
+        medium.pass(sendBit);
+    }
+
+    msgsrv receive(boolean status) {
+        hasSucceeded = status;
+        sendBit = !sendBit; // Toggle the bit for sending alternate messages
+        self.sendMsg();
+    }
+}
+
+reactiveclass Receiver(2) {
+    knownrebecs {
+        Messenger messenger;
+    }
+    statevars {
+        boolean messageBit;
+    }
+
+    Receiver() {
+        messageBit = false;
+    }
+
+    msgsrv receiveMsg(boolean msgBit) {
+        messageBit = msgBit;
+        messenger.receive(true);
+    }
+}
+
+reactiveclass Medium(3) {
+    knownrebecs {
+        Receiver receiver;
+        Messenger messenger;
+    }
+    statevars {
+        boolean passMessage;
+    }
+
+    Medium() {
+        passMessage = true;
+    }
+
+    msgsrv pass(boolean msgBit) {
+        // Simulate network reliability randomness
+        passMessage = (Math.random() > 0.5) ? true : networkReliability;
+        if (passMessage) {
+            receiver.receiveMsg(msgBit);
+        } else {
+            messenger.receive(false);
+        }
+    }
+}
+
+main {
+    Medium medium():();
+    Messenger messenger(medium):();
+    Receiver receiver(messenger):();
+    medium.setKnownRebecs(receiver, messenger);
+}

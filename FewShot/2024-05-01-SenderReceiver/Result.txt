@@ -1,0 +1,86 @@
+Here is the translation of the provided PlantUML diagram into Rebeca (Reactive Objects Language) code for the Messenger, Receiver, and Medium:
+
+env boolean networkReliability = true;
+
+reactiveclass Messenger(5) {
+    knownrebecs {
+        Medium medium;
+    }
+    statevars {
+        boolean sendBit;
+        boolean hasSucceeded;
+    }
+
+    Messenger() {
+        sendBit = false;
+        hasSucceeded = false;
+        self.sendMsg();
+    }
+
+    msgsrv sendMsg() {
+        medium.pass(sendBit);
+    }
+
+    msgsrv receive(boolean status) {
+        hasSucceeded = status;
+        sendBit = !sendBit; // Toggle the bit for sending alternate messages
+        self.sendMsg();
+    }
+}
+
+reactiveclass Receiver(2) {
+    knownrebecs {
+        Messenger messenger;
+    }
+    statevars {
+        boolean messageBit;
+    }
+
+    Receiver() {
+        messageBit = false;
+    }
+
+    msgsrv receiveMsg(boolean msgBit) {
+        messageBit = msgBit;
+        messenger.receive(true);
+    }
+}
+
+reactiveclass Medium(3) {
+    knownrebecs {
+        Receiver receiver;
+        Messenger messenger;
+    }
+    statevars {
+        boolean passMessage;
+    }
+
+    Medium() {
+        passMessage = true;
+    }
+
+    msgsrv pass(boolean msgBit) {
+        // Simulate network reliability randomness
+        passMessage = (Math.random() > 0.5) ? true : networkReliability;
+        if (passMessage) {
+            receiver.receiveMsg(msgBit);
+        } else {
+            messenger.receive(false);
+        }
+    }
+}
+
+main {
+    Medium medium():();
+    Messenger messenger(medium):();
+    Receiver receiver(messenger):();
+    medium.setKnownRebecs(receiver, messenger);
+}
+
+This code assumes the following functionalities:
+
+    Messenger sends a message through the Medium, toggling its send bit each time to simulate sending different messages.
+    Receiver receives messages and confirms to the Messenger that the message was successfully received.
+    Medium simulates a potentially unreliable network where messages may or may not get passed through. It randomly decides whether to pass the message to the Receiver or inform the Messenger of a failure based on a simplistic simulation of network reliability.
+
+This scenario is somewhat simplified and assumes ideal conditions where the message passing and status checking happen without delay or error, except for simulated network issues.

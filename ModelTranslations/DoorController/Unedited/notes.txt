@@ -1,0 +1,3 @@
+Code is copied from a pdf then edited by hand to try to copy the syntax, might not be all the same.
+
+URL: https://rebeca-lang.org/assets/papers/2020/Towards-a-Verification-Driven-Iterative-Development-of-Cyber-Physical-System.pdf

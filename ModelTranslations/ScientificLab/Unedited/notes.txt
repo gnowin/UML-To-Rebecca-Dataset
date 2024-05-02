@@ -1,0 +1,1 @@
+Source code is in the Rebeca Handbook "Modeling and Analysis of Actor Systems from the Trench", January 12, 2024

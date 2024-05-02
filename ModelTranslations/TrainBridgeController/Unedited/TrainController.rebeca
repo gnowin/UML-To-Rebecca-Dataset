@@ -1,0 +1,95 @@
+reactiveclass BridgeController(5) {
+	knownrebecs {
+		Train t1;
+		Train t2;
+	}
+
+	statevars {
+		boolean isWaiting1;
+		boolean isWaiting2;
+		boolean isOnBridge1;
+		boolean isOnBridge2;
+	}
+
+	BridgeController() {
+		isOnBridge1 = false;	/* red */
+		isOnBridge2 = false;	/* red */
+		isWaiting1 = false;
+		isWaiting2 = false;
+	}
+	
+	msgsrv Arrive() {
+		if (sender == t1){
+			if (isOnBridge2 == false) {
+				isOnBridge1 = true;	/* green */
+				t1.YouMayPass();
+			}
+			else {
+				isWaiting1 = true;
+			}
+		}
+		else {
+			if (isOnBridge1 == false){
+				isOnBridge2 = true;	/* green */
+				t2.YouMayPass();
+			}
+			else{
+				isWaiting2 = true;
+			}
+		}
+	}
+	
+	msgsrv Leave() {
+		if (sender == t1) {
+			isOnBridge1 = false;	/* red */
+			if (isWaiting2){
+				isOnBridge2 = true;
+				t2.YouMayPass();
+				isWaiting2 = false;
+			}
+		} else {
+			isOnBridge2 = false;	/* red */
+			if (isWaiting1) {
+				isOnBridge1 = true;
+				t1.YouMayPass();
+				isWaiting1 = false;
+			}
+		}
+	}
+}
+
+reactiveclass Train(3) {
+	knownrebecs {
+		BridgeController controller;
+	}
+
+	statevars {
+		boolean onTheBridge;
+	}
+
+	Train() {
+		onTheBridge = false;
+		self.Passed();
+	}
+
+	msgsrv YouMayPass() {
+		onTheBridge = true;
+		self.Passed();
+	}
+	
+	msgsrv Passed() {
+		onTheBridge = false;
+		controller.Leave();
+		self.ReachBridge();
+	}
+
+	msgsrv ReachBridge() {
+		controller.Arrive();
+	}
+}
+
+main {
+	Train train1(theController):();
+	Train train2(theController):();
+	BridgeController theController(train1, train2):();
+}

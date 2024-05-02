@@ -1,0 +1,81 @@
+reactiveclass Sender(5) { 
+	knownrebecs { 
+		Medium medium; 
+		Receiver rec;     
+	} 
+      
+	statevars { 
+		boolean receivedBit; 
+		boolean sendBit; 
+		boolean hasSucceeded; 
+	} 
+  
+	msgsrv initial() { 
+		sendBit = false; 
+		medium.pass(sendBit); 
+		self.sendMsg(); 
+	} 
+  
+	msgsrv sendMsg() { 
+		//receive(hasSucceeded) 
+		if (hasSucceeded == true) { 
+			if (sendBit == true) { 
+				sendBit = false; 
+			} else { 
+				sendBit = true; 
+			} 
+		} 
+            
+		medium.pass(sendBit); 
+		self.sendMsg(); 
+	} 
+} 
+  
+reactiveclass Receiver(5) { 
+	knownrebecs { 
+		Medium medium; 
+		Sender sender;    
+	} 
+      
+	statevars { 
+		boolean messageBit; 
+	} 
+  
+	msgsrv initial() { 
+	} 
+  
+	msgsrv receiveMsg(boolean msgBit) { 
+		messageBit =msgBit; 
+		//sender.receive(true); 
+	} 
+} 
+  
+reactiveclass Medium(5) { 
+	knownrebecs { 
+		Receiver receiver; 
+		Sender sender;    
+	} 
+      
+	statevars { 
+		boolean passMessage; 
+	} 
+  
+	msgsrv initial() { 
+		passMessage=true; 
+	} 
+  
+	msgsrv pass(boolean msgBit) { 
+		passMessage = ?(true,false); 
+		if(passMessage == true) { 
+			receiver.receiveMsg( msgBit); 
+		} else { 
+			//sender,receive(false); 
+		} 
+	} 
+} 
+  
+main { 
+	Sender sender (medium, receiver):(); 
+	Medium medium(receiver, sender):(); 
+	Receiver receiver(medium, sender):(); 
+} 
